@@ -13,6 +13,9 @@ export default defineConfig({
     },
   },
   build: {
+    // The editor chunk (Tiptap + ProseMirror) is large but lazy — loaded only
+    // when a document is opened, never in the initial app bundle.
+    chunkSizeWarningLimit: 600,
     rollupOptions: {
       output: {
         // Split the framework baseline into cacheable vendor chunks so the app
@@ -28,6 +31,9 @@ export default defineConfig({
             /[\\/]node_modules[\\/]zod[\\/]/.test(id)
           )
             return 'forms'
+          // Editor stack — loaded with the lazy document route, kept off the rest.
+          if (id.includes('@tiptap') || id.includes('prosemirror')) return 'editor'
+          if (/[\\/]node_modules[\\/](yjs|y-protocols|lib0)[\\/]/.test(id)) return 'yjs'
         },
       },
     },

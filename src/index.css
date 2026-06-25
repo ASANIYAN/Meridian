@@ -253,3 +253,58 @@
     transform: none;
   }
 }
+
+/* ───────────────────────── Editor (Tiptap / ProseMirror) ─────────────────────────
+   The document's reading surface. Body in Geist; the document's own headings
+   speak in Fraunces (the serif voice reserved for document titles/headings). */
+.meridian-editor .ProseMirror {
+  min-height: 60vh;
+  outline: none;
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--foreground);
+}
+.meridian-editor .ProseMirror > * + * {
+  margin-top: 0.85em;
+}
+.meridian-editor .ProseMirror h1,
+.meridian-editor .ProseMirror h2,
+.meridian-editor .ProseMirror h3 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--foreground);
+  margin-top: 1.4em;
+}
+.meridian-editor .ProseMirror h1 {
+  font-size: 1.875rem;
+}
+.meridian-editor .ProseMirror h2 {
+  font-size: 1.5rem;
+}
+.meridian-editor .ProseMirror h3 {
+  font-size: 1.25rem;
+}
+.meridian-editor .ProseMirror ul,
+.meridian-editor .ProseMirror ol {
+  padding-left: 1.4em;
+}
+.meridian-editor .ProseMirror ul {
+  list-style: disc;
+}
+.meridian-editor .ProseMirror ol {
+  list-style: decimal;
+}
+.meridian-editor .ProseMirror li > * + * {
+  margin-top: 0.4em;
+}
+.meridian-editor .ProseMirror strong {
+  font-weight: 650;
+}
+.meridian-editor .ProseMirror em {
+  font-style: italic;
+}
+.meridian-editor .ProseMirror ::selection {
+  background: color-mix(in srgb, var(--brass) 22%, transparent);
+}
