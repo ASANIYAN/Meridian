@@ -18,5 +18,13 @@ export default defineConfig([
     languageOptions: {
       globals: globals.browser,
     },
+    rules: {
+      // shadcn's button.tsx ships `buttonVariants` alongside the component; allow
+      // it by name rather than hand-editing components/ui (CLAUDE.md §2).
+      'react-refresh/only-export-components': [
+        'error',
+        { allowConstantExport: true, allowExportNames: ['buttonVariants'] },
+      ],
+    },
   },
 ])
