@@ -16,7 +16,7 @@ export function Cartouche({ coordinate, title, className }: CartoucheProps) {
   return (
     <div
       className={cn(
-        'mb-6 flex items-center justify-between border-b border-border pb-4 font-mono text-[11px] uppercase tracking-[0.16em] text-muted-foreground',
+        'flex items-center justify-between border-b border-border pb-4 font-mono text-[11px] uppercase tracking-[0.16em] text-muted-foreground',
         className,
       )}
     >
