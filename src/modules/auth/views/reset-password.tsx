@@ -1,43 +1,60 @@
 import { AuthLayout } from '@/components/custom-components/auth-layout'
 import { AuthPlate } from '@/components/custom-components/auth-plate'
 import { Cartouche } from '@/components/custom-components/cartouche'
-import { Field } from '../components/field'
+import { FormField } from '../components/form-field'
+import { FormError } from '../components/form-error'
 import { AuthSubmit } from '../components/auth-submit'
+import { AuthNotice } from '../components/auth-notice'
 import { MonoLink } from '../components/auth-links'
+import { useResetPassword } from '../hooks/use-reset-password'
 
-/**
- * Presentational reset-password screen. The token rides in the URL; the real
- * form (FE-AUTH-6) validates password === confirm locally and submits only
- * { token, new_password } — confirm_password never leaves the client.
- */
 export function ResetPasswordView() {
+  const { form, onSubmit, isPending, hasToken } = useResetPassword()
+  const rootError = form.formState.errors.root?.message
+
   return (
     <AuthLayout lede={<>Set a new <em className="italic text-brass-soft">bearing</em>.</>}>
-      <AuthPlate>
-        <Cartouche coordinate="51°28′N · 0°00′W" title="New password" />
-
-        <div className="space-y-4">
-          <Field
-            id="password"
-            label="New password"
-            type="password"
-            placeholder="8–32 characters"
-            autoComplete="new-password"
+      <AuthPlate onSubmit={onSubmit}>
+        {!hasToken ? (
+          <AuthNotice
+            tone="error"
+            coordinate="51°28′N · 0°00′W"
+            title="New password"
+            heading="This link didn't work"
+            description="This reset link is invalid or has expired. Request a fresh one."
+            footer={<MonoLink to="/forgot-password">Request a new link</MonoLink>}
           />
-          <Field
-            id="confirmPassword"
-            label="Confirm password"
-            type="password"
-            placeholder="Re-enter password"
-            autoComplete="new-password"
-          />
-        </div>
+        ) : (
+          <>
+            <Cartouche coordinate="51°28′N · 0°00′W" title="New password" />
+            <FormError message={rootError} />
 
-        <AuthSubmit>Set password</AuthSubmit>
+            <div className="space-y-4">
+              <FormField
+                control={form.control}
+                name="password"
+                label="New password"
+                type="password"
+                placeholder="8–32 characters"
+                autoComplete="new-password"
+              />
+              <FormField
+                control={form.control}
+                name="confirmPassword"
+                label="Confirm password"
+                type="password"
+                placeholder="Re-enter password"
+                autoComplete="new-password"
+              />
+            </div>
 
-        <div className="text-center">
-          <MonoLink to="/login">Back to sign in</MonoLink>
-        </div>
+            <AuthSubmit pending={isPending}>Set password</AuthSubmit>
+
+            <div className="text-center">
+              <MonoLink to="/login">Back to sign in</MonoLink>
+            </div>
+          </>
+        )}
       </AuthPlate>
     </AuthLayout>
   )
