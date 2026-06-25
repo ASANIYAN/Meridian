@@ -6,6 +6,7 @@ import { ForgotPasswordView } from '@/modules/auth/views/forgot-password'
 import { ResetPasswordView } from '@/modules/auth/views/reset-password'
 import { ResendVerificationView } from '@/modules/auth/views/resend-verification'
 import { ClaimView } from '@/modules/join/views/claim'
+import { AppShellPreview } from '@/dev/app-shell-preview'
 
 /**
  * Auth + public-claim routes. The authenticated shell (/documents,
@@ -21,4 +22,5 @@ export const router = createBrowserRouter([
   { path: '/reset-password', element: <ResetPasswordView /> },
   { path: '/resend-verification', element: <ResendVerificationView /> },
   { path: '/join/:token', element: <ClaimView /> },
+  { path: '/preview/app', element: <AppShellPreview /> },
 ])
