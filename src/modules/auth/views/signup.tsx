@@ -1,39 +1,79 @@
 import { AuthLayout } from '@/components/custom-components/auth-layout'
 import { AuthPlate } from '@/components/custom-components/auth-plate'
 import { Cartouche } from '@/components/custom-components/cartouche'
-import { Field } from '../components/field'
+import { FormField } from '../components/form-field'
+import { FormError } from '../components/form-error'
 import { AuthSubmit } from '../components/auth-submit'
-import { AltPrompt } from '../components/auth-links'
+import { AltPrompt, MonoLink } from '../components/auth-links'
+import { AuthNotice } from '../components/auth-notice'
+import { useSignup } from '../hooks/use-signup'
 
-/**
- * Presentational signup screen. On a real submit (FE-AUTH-1) the backend issues
- * no JWT — success swaps this plate for the check-your-email notice (AuthNotice,
- * tone="sent"), it does not log the user in or redirect to /documents.
- */
 export function SignupView() {
+  const { form, onSubmit, isPending, submitted, email } = useSignup()
+  const rootError = form.formState.errors.root?.message
+
   return (
     <AuthLayout lede={<>Start where your <em className="italic text-brass-soft">drafts</em> converge.</>}>
-      <AuthPlate>
-        <Cartouche coordinate="51°28′N · 0°00′W" title="Create account" />
-
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
-            <Field id="firstName" label="First name" placeholder="Ada" autoComplete="given-name" />
-            <Field id="lastName" label="Last name" placeholder="Lovelace" autoComplete="family-name" />
-          </div>
-          <Field id="email" label="Email" type="email" placeholder="you@studio.com" autoComplete="email" />
-          <Field
-            id="password"
-            label="Password"
-            type="password"
-            placeholder="8–32 characters"
-            autoComplete="new-password"
+      <AuthPlate onSubmit={onSubmit}>
+        {submitted ? (
+          <AuthNotice
+            tone="sent"
+            coordinate="51°28′N · 0°00′W"
+            title="Check your email"
+            heading="Confirm your email"
+            description={
+              <>
+                We sent a confirmation link to <span className="text-foreground">{email}</span>. Open
+                it to start writing.
+              </>
+            }
+            footer={<MonoLink to="/login">Back to sign in</MonoLink>}
           />
-        </div>
+        ) : (
+          <>
+            <Cartouche coordinate="51°28′N · 0°00′W" title="Create account" />
+            <FormError message={rootError} />
 
-        <AuthSubmit>Create account</AuthSubmit>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <FormField
+                  control={form.control}
+                  name="firstName"
+                  label="First name"
+                  placeholder="Ada"
+                  autoComplete="given-name"
+                />
+                <FormField
+                  control={form.control}
+                  name="lastName"
+                  label="Last name"
+                  placeholder="Lovelace"
+                  autoComplete="family-name"
+                />
+              </div>
+              <FormField
+                control={form.control}
+                name="email"
+                label="Email"
+                type="email"
+                placeholder="you@studio.com"
+                autoComplete="email"
+              />
+              <FormField
+                control={form.control}
+                name="password"
+                label="Password"
+                type="password"
+                placeholder="8–32 characters"
+                autoComplete="new-password"
+              />
+            </div>
 
-        <AltPrompt prompt="Already have an account?" to="/login" action="Sign in" />
+            <AuthSubmit pending={isPending}>Create account</AuthSubmit>
+
+            <AltPrompt prompt="Already have an account?" to="/login" action="Sign in" />
+          </>
+        )}
       </AuthPlate>
     </AuthLayout>
   )

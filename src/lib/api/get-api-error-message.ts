@@ -36,6 +36,11 @@ export function isApiError(error: unknown): error is ApiError {
   )
 }
 
+/** The HTTP status of an error, if it carries a response. */
+export function getApiErrorStatus(error: unknown): number | undefined {
+  return isApiError(error) ? error.response?.status : undefined
+}
+
 function firstMessage(message: string | string[] | undefined): string | undefined {
   if (Array.isArray(message)) return message.length > 0 ? message[0] : undefined
   if (typeof message === 'string' && message.trim()) return message
