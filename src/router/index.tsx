@@ -8,6 +8,7 @@ import { ResetPasswordView } from '@/modules/auth/views/reset-password'
 import { ResendVerificationView } from '@/modules/auth/views/resend-verification'
 import { ClaimView } from '@/modules/join/views/claim'
 import { DocumentsView } from '@/modules/documents/views/documents'
+import { DocumentRoute } from '@/modules/collaboration/views/document-route'
 import { RequireAuth } from './require-auth'
 import { AppShellPreview } from '@/dev/app-shell-preview'
 
@@ -31,7 +32,10 @@ export const router = createBrowserRouter([
   // Guarded
   {
     element: <RequireAuth />,
-    children: [{ path: '/documents', element: <DocumentsView /> }],
+    children: [
+      { path: '/documents', element: <DocumentsView /> },
+      { path: '/documents/:id', element: <DocumentRoute /> },
+    ],
   },
 
   { path: '/preview/app', element: <AppShellPreview /> },
