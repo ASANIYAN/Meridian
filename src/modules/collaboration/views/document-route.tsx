@@ -1,19 +1,38 @@
+import { useMemo } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import { AppShell } from '@/components/custom-components/app-shell'
 import { useAuthStore } from '@/store/auth-store'
 import { fullName } from '@/types/user'
+import type { DocumentSummary } from '@/types/document'
+import { documentsKey } from '@/modules/documents/hooks/use-documents'
+import { useDocumentConnection } from '../hooks/use-document-connection'
+import { CollaborationContext } from '../context/collaboration-context'
+import { ConnectionStatusIndicator } from '../components/connection-status-indicator'
+import { PresenceSummary } from '../components/presence-summary'
+import { DocumentWorkspace } from '../components/document-workspace'
 
 /**
- * Placeholder for the document route. The real surface — useDocumentConnection,
- * the custom Yjs provider, the Tiptap editor, presence, and the AI chat — is the
- * collaboration epic (FE-COLLAB-*, FE-EDITOR-*). This stub lets create + card
- * navigation land somewhere real in the meantime.
+ * The document route — the single owner of the connection lifecycle (CLAUDE.md
+ * §4). useDocumentConnection runs once here; its output feeds the Context that
+ * wraps the subtree. React unmounts the Provider on navigation away, which tears
+ * the connection down automatically — no manual disconnect.
  */
 export function DocumentRoute() {
-  const { id } = useParams()
+  const { id = '' } = useParams()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const user = useAuthStore((s) => s.user)
   const clearSession = useAuthStore((s) => s.clearSession)
+
+  // Role from the documents cache when we have it; deep-links may not (the
+  // backend still enforces access regardless).
+  const role = useMemo(() => {
+    const docs = queryClient.getQueryData<DocumentSummary[]>(documentsKey)
+    return docs?.find((d) => d.id === id)?.role
+  }, [queryClient, id])
+
+  const connection = useDocumentConnection(id, role)
 
   if (!user) return null
 
@@ -23,26 +42,23 @@ export function DocumentRoute() {
   }
 
   return (
-    <AppShell user={{ name: fullName(user), email: user.email }} onSignOut={signOut}>
-      <Link
-        to="/documents"
-        className="font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground transition-colors duration-150 ease-out hover:text-foreground"
+    <CollaborationContext.Provider value={connection}>
+      <AppShell
+        user={{ name: fullName(user), email: user.email }}
+        onSignOut={signOut}
+        connectionStatus={<ConnectionStatusIndicator />}
+        presence={<PresenceSummary />}
       >
-        ← Back to documents
-      </Link>
-
-      <div className="mt-10 grid place-items-center rounded-md border border-dashed border-border py-24 text-center">
-        <div className="max-w-[42ch]">
-          <h1 className="font-display text-[1.5rem] text-foreground">The editor lands soon</h1>
-          <p className="mt-2 text-[13.5px] leading-relaxed text-muted-foreground">
-            The collaborative editor for this document is the next epic — the custom Yjs provider,
-            the wire protocol, and the Tiptap surface.
-          </p>
-          <p className="mt-4 font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground/70">
-            Document · {id}
-          </p>
+        <Link
+          to="/documents"
+          className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground transition-colors duration-150 ease-out hover:text-foreground"
+        >
+          ← Back to documents
+        </Link>
+        <div className="mt-8">
+          <DocumentWorkspace />
         </div>
-      </div>
-    </AppShell>
+      </AppShell>
+    </CollaborationContext.Provider>
   )
 }
