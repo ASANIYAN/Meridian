@@ -166,6 +166,30 @@
 .toast-in {
   animation: toast-in 220ms ease-out;
 }
+@keyframes overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+.dialog-overlay[data-state='open'] {
+  animation: overlay-in 150ms ease-out;
+}
+.dialog-content[data-state='open'] {
+  animation: dialog-in 180ms ease-out;
+}
 .rise {
   opacity: 0;
   transform: translateY(8px);
@@ -212,6 +236,10 @@
     animation: none;
   }
   .toast-in {
+    animation: none;
+  }
+  .dialog-overlay[data-state='open'],
+  .dialog-content[data-state='open'] {
     animation: none;
   }
   .rise {

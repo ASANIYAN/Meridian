@@ -3,7 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
 import { signup } from '../api/auth-api'
 import { signupSchema, type SignupValues } from '../utils/schemas'
-import { applyApiErrorsToForm } from '../utils/apply-api-errors'
+import { applyApiErrorsToForm } from '@/lib/forms/apply-api-errors'
 
 const KNOWN_FIELDS = ['firstName', 'lastName', 'email', 'password'] as const
 
