@@ -1,111 +1,175 @@
+/* Self-hosted variable fonts (Fraunces opsz+italic, Geist, Geist Mono) */
+@import '@fontsource-variable/fraunces/opsz.css';
+@import '@fontsource-variable/fraunces/opsz-italic.css';
+@import '@fontsource-variable/geist/wght.css';
+@import '@fontsource-variable/geist-mono/wght.css';
+
+@import 'tailwindcss';
+
+/* ───────────────────────── Brand tokens ─────────────────────────
+   Meridian's identity: a navigation chart. Cool ink, cool paper,
+   a single brass accent = "true north". Presence hues are ink-tinted. */
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+  --ink: #0f1a2a;
+  --graphite: #1b2737;
+  --vellum: #f6f7f9;
+  --mist: #d7dee6;
+  --slate: #4f6072;
+  --brass: #cda349;
+  --brass-soft: #e2c079;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+  --presence-teal: #3e8e8a;
+  --presence-coral: #c56b5b;
+  --presence-violet: #7a6bb0;
+  --presence-moss: #6e8c52;
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  --font-display: 'Fraunces Variable', Georgia, serif;
+  --font-sans: 'Geist Variable', system-ui, sans-serif;
+  --font-mono: 'Geist Mono Variable', ui-monospace, monospace;
 
-  @media (max-width: 1024px) {
-    font-size: 16px;
+  --radius: 0.5rem;
+
+  /* Semantic — light register (the app / chart table) */
+  --background: var(--vellum);
+  --foreground: var(--ink);
+  --card: #ffffff;
+  --card-foreground: var(--ink);
+  --muted: #eceff3;
+  --muted-foreground: var(--slate);
+  --border: var(--mist);
+  --input: var(--mist);
+  --ring: var(--brass);
+  --primary: var(--ink);
+  --primary-foreground: var(--vellum);
+  --accent: var(--brass);
+  --accent-foreground: var(--ink);
+  --seam: color-mix(in srgb, var(--brass) 55%, transparent);
+}
+
+/* Semantic — dark register (auth / the chart) */
+.chart {
+  --background: var(--ink);
+  --foreground: var(--vellum);
+  --card: var(--graphite);
+  --card-foreground: var(--vellum);
+  --muted: #14202f;
+  --muted-foreground: #889aad;
+  --border: color-mix(in srgb, var(--mist) 13%, transparent);
+  --input: color-mix(in srgb, var(--mist) 14%, transparent);
+  --ring: var(--brass);
+  --primary: var(--brass);
+  --primary-foreground: var(--ink);
+  --accent: var(--brass);
+  --accent-foreground: var(--ink);
+  --seam: color-mix(in srgb, var(--brass) 55%, transparent);
+}
+
+/* Expose tokens to Tailwind utilities (bg-background, text-foreground, etc.) */
+@theme inline {
+  --color-ink: var(--ink);
+  --color-graphite: var(--graphite);
+  --color-vellum: var(--vellum);
+  --color-mist: var(--mist);
+  --color-slate: var(--slate);
+  --color-brass: var(--brass);
+  --color-brass-soft: var(--brass-soft);
+
+  --color-presence-teal: var(--presence-teal);
+  --color-presence-coral: var(--presence-coral);
+  --color-presence-violet: var(--presence-violet);
+  --color-presence-moss: var(--presence-moss);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --font-display: var(--font-display);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    margin: 0;
+    min-height: 100dvh;
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
+/* ───────────────────────── Motion ─────────────────────────
+   Rare / first-time tier only (auth entrance). High-frequency
+   surfaces (the editor) get none of this. */
+@keyframes graticule-draw {
+  to {
+    stroke-dashoffset: 0;
   }
 }
-
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-}
-
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
-}
-
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
+@keyframes node-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+    r: 3;
+  }
+  50% {
+    opacity: 1;
+    r: 4.5;
   }
 }
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
+@keyframes rise {
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
-p {
-  margin: 0;
+
+.graticule-line {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: graticule-draw 1500ms ease forwards;
+}
+.graticule-node-converging {
+  animation: node-pulse 1900ms ease-in-out infinite;
+}
+.rise {
+  opacity: 0;
+  transform: translateY(8px);
+  animation: rise 540ms ease-out forwards;
 }
 
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
-}
-
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+@media (prefers-reduced-motion: reduce) {
+  .graticule-line {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+  .graticule-node-converging {
+    animation: none;
+  }
+  .rise {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
 }
