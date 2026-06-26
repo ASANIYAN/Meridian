@@ -7,13 +7,15 @@ import { resetPassword } from '../api/auth-api'
 import { resetPasswordSchema, type ResetPasswordValues } from '../utils/schemas'
 
 /**
- * Reset-password (FE-AUTH-6). The token rides in the URL; confirmPassword is
- * validated locally and stripped — only { token, new_password } reaches the API.
- * On success, redirect to /login with a confirmation toast; on failure, one
- * generic invalid-or-expired message.
+ * Reset-password (FE-AUTH-6). The link carries both `email` and `token` in the
+ * URL; confirmPassword is validated locally and stripped — only
+ * { email, token, newPassword } reaches the API (CLAUDE.md §7). On success,
+ * redirect to /login with a toast; on failure, one generic invalid-or-expired
+ * message.
  */
 export function useResetPassword() {
   const [params] = useSearchParams()
+  const email = params.get('email')
   const token = params.get('token')
   const navigate = useNavigate()
   const addToast = useToastStore((s) => s.addToast)
@@ -26,7 +28,7 @@ export function useResetPassword() {
 
   const mutation = useMutation({
     mutationFn: (values: ResetPasswordValues) =>
-      resetPassword({ token: token ?? '', new_password: values.password }),
+      resetPassword({ email: email ?? '', token: token ?? '', newPassword: values.password }),
     onSuccess: () => {
       addToast({ message: 'Password updated. Sign in with your new password.', variant: 'success' })
       navigate('/login', { replace: true })
@@ -41,5 +43,5 @@ export function useResetPassword() {
     mutation.mutate(values)
   })
 
-  return { form, onSubmit, isPending: mutation.isPending, hasToken: !!token }
+  return { form, onSubmit, isPending: mutation.isPending, hasToken: !!email && !!token }
 }

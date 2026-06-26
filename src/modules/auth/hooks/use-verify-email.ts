@@ -3,32 +3,38 @@ import { useSearchParams } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
 import { verifyEmail } from '../api/auth-api'
 
-export type VerifyStatus = 'pending' | 'success' | 'error'
+export type VerifyStatus = 'pending' | 'success' | 'already-verified' | 'error'
 
 /**
- * Verify-email (FE-AUTH-3). Reads the token from the URL, fires the mutation
- * once on mount, and reduces to three states. Any failure — expired, already
- * verified, invalid, or missing token — collapses to a single generic error,
- * leaking nothing about why.
+ * Verify-email (FE-AUTH-3). The emailed link carries both `email` and `token` as
+ * query params; the endpoint requires both (CLAUDE.md §7). Fires once on mount.
+ * Already-verified is a 200 with `alreadyVerified: true` — surfaced as its own
+ * state, not the generic failure. Any real failure collapses to a generic error.
  */
 export function useVerifyEmail(): { status: VerifyStatus } {
   const [params] = useSearchParams()
+  const email = params.get('email')
   const token = params.get('token')
   const fired = useRef(false)
-  const mutation = useMutation({ mutationFn: verifyEmail })
+
+  const mutation = useMutation({
+    mutationFn: () => verifyEmail(email ?? '', token ?? ''),
+  })
 
   useEffect(() => {
-    if (fired.current || !token) return
+    if (fired.current || !email || !token) return
     fired.current = true
-    mutation.mutate(token)
-    // Fire exactly once for the token present at mount.
+    mutation.mutate()
+    // Fire exactly once for the email + token present at mount.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token])
+  }, [email, token])
 
-  const status: VerifyStatus = !token
+  const status: VerifyStatus = !email || !token
     ? 'error'
     : mutation.isSuccess
-      ? 'success'
+      ? mutation.data?.alreadyVerified
+        ? 'already-verified'
+        : 'success'
       : mutation.isError
         ? 'error'
         : 'pending'

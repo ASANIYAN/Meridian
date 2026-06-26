@@ -1,5 +1,4 @@
 import axios, { type AxiosResponse } from 'axios'
-import { env } from '@/config/env'
 import { useAuthStore } from '@/store/auth-store'
 
 /** Every REST response is wrapped in this envelope (CLAUDE.md §2). */
@@ -15,9 +14,14 @@ export function unwrap<T>(response: AxiosResponse<ApiEnvelope<T>>): T {
   return response.data.data
 }
 
-/** Base client. The global /v1 prefix lives here, not in each hook (CLAUDE.md §2). */
+/**
+ * Base client. The /v1 prefix lives here, not in each hook (CLAUDE.md §2). The
+ * base is the *relative* `/v1` so requests are same-origin — routed to the API by
+ * the Vite dev proxy in development and by nginx in production (FE-SETUP-7). This
+ * avoids cross-origin CORS entirely rather than depending on backend CORS config.
+ */
 export const apiClient = axios.create({
-  baseURL: `${env.VITE_API_URL}/v1`,
+  baseURL: '/v1',
   headers: { 'Content-Type': 'application/json' },
 })
 
