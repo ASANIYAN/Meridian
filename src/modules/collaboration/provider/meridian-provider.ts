@@ -2,6 +2,7 @@ import * as Y from 'yjs'
 import type { Role } from '@/types/document'
 import { classifyClose, type CloseAction } from './close-codes'
 import { base64ToBytes, coerceBytes, encodeJoinMessage, encodeUpdateMessage } from './frames'
+import { applyPresenceUpdate, flattenParticipants, parsePresenceFrame } from './presence'
 import type { ConnectionStatus, PresentUser } from '../types/collaboration.types'
 
 interface ProviderCallbacks {
@@ -119,11 +120,22 @@ export class MeridianProvider {
   }
 
   private handleTextFrame(raw: string) {
-    let frame: { event?: string; data?: unknown }
+    let frame: { type?: string; event?: string; data?: unknown }
     try {
       frame = JSON.parse(raw)
     } catch {
       console.warn('[meridian] non-JSON text frame', raw)
+      return
+    }
+
+    // Presence is keyed by `type`, not `event` — a distinct branch, checked first
+    // (CLAUDE.md §4). A dispatcher that only switches on `event` never sees it.
+    if (frame.type === 'presence') {
+      const update = parsePresenceFrame(frame)
+      if (update) {
+        this.presentUsers = applyPresenceUpdate(this.presentUsers, update)
+        this.opts.onPresence(this.presentUsers)
+      }
       return
     }
 
@@ -139,14 +151,8 @@ export class MeridianProvider {
           String(asRecord(frame.data).message ?? 'You are approaching the rate limit.'),
         )
         break
-      case 'online':
-        this.handleOnline(frame.data)
-        break
-      case 'offline':
-        this.handleOffline(frame.data)
-        break
       default:
-        console.warn('[meridian] unrecognized event', frame.event)
+        console.warn('[meridian] unrecognized frame', frame.event)
     }
   }
 
@@ -164,8 +170,8 @@ export class MeridianProvider {
       }
     }, this)
 
-    const participants = Array.isArray(d.participants) ? d.participants : []
-    this.presentUsers = participants.map(normalizeUser)
+    // participants is a MAP { userId: displayName }, not an array (CLAUDE.md §4).
+    this.presentUsers = flattenParticipants(d.participants)
     this.opts.onPresence(this.presentUsers)
 
     this.reconnectAttempts = 0
@@ -191,19 +197,6 @@ export class MeridianProvider {
       this.pending.shift()
       this.opts.onAckRetriesExhausted()
     }
-  }
-
-  private handleOnline(data: unknown) {
-    const user = normalizeUser(data)
-    if (!user.userId || this.presentUsers.some((u) => u.userId === user.userId)) return
-    this.presentUsers = [...this.presentUsers, user]
-    this.opts.onPresence(this.presentUsers)
-  }
-
-  private handleOffline(data: unknown) {
-    const user = normalizeUser(data)
-    this.presentUsers = this.presentUsers.filter((u) => u.userId !== user.userId)
-    this.opts.onPresence(this.presentUsers)
   }
 
   // ── outbound updates ────────────────────────────────────────────────────
@@ -264,13 +257,5 @@ export class MeridianProvider {
 
   private isSocketOpen() {
     return this.ws != null && this.ws.readyState === WebSocket.OPEN
-  }
-}
-
-function normalizeUser(raw: unknown): PresentUser {
-  const r = asRecord(raw)
-  return {
-    userId: String(r.userId ?? r.user_id ?? ''),
-    displayName: String(r.displayName ?? r.display_name ?? r.email ?? 'Someone'),
   }
 }
