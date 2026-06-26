@@ -38,6 +38,21 @@ export function VerifyEmailView() {
           />
         )}
 
+        {status === 'already-verified' && (
+          <AuthNotice
+            tone="success"
+            coordinate={COORD}
+            title="Verify email"
+            heading="Already verified"
+            description="This account is already confirmed. You can sign in and start writing."
+            footer={
+              <Button asChild variant="accent" size="lg" className="w-full">
+                <Link to="/login">Continue to sign in</Link>
+              </Button>
+            }
+          />
+        )}
+
         {status === 'error' && (
           <AuthNotice
             tone="error"
