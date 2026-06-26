@@ -190,6 +190,15 @@
 .dialog-content[data-state='open'] {
   animation: dialog-in 180ms ease-out;
 }
+/* Right-edge slide-over (AI assistant sidebar, FE-CHAT-1). */
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
 .rise {
   opacity: 0;
   transform: translateY(8px);
