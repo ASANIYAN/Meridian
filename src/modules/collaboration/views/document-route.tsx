@@ -9,7 +9,7 @@ import { documentsKey } from '@/modules/documents/hooks/use-documents'
 import { useDocumentConnection } from '../hooks/use-document-connection'
 import { CollaborationContext } from '../context/collaboration-context'
 import { ConnectionStatusIndicator } from '../components/connection-status-indicator'
-import { PresenceSummary } from '../components/presence-summary'
+import { PresenceStack } from '../components/presence-stack'
 import { DocumentWorkspace } from '../components/document-workspace'
 
 /**
@@ -47,7 +47,7 @@ export function DocumentRoute() {
         user={{ name: fullName(user), email: user.email }}
         onSignOut={signOut}
         connectionStatus={<ConnectionStatusIndicator />}
-        presence={<PresenceSummary />}
+        presence={<PresenceStack />}
       >
         <Link
           to="/documents"

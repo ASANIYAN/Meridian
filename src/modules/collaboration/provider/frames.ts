@@ -44,7 +44,8 @@ export function coerceBytes(value: unknown): Uint8Array | null {
   }
   if (typeof value === 'object') {
     const obj = value as Record<string, unknown>
-    for (const key of ['update', 'payload', 'data', 'bytes']) {
+    // `yjsUpdate` is the operation-row field the backend tells us to use (§4).
+    for (const key of ['yjsUpdate', 'update', 'payload', 'data', 'bytes']) {
       if (key in obj) {
         const inner = coerceBytes(obj[key])
         if (inner) return inner
