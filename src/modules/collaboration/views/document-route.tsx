@@ -1,11 +1,12 @@
 import { useMemo } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { AppShell } from '@/components/custom-components/app-shell'
 import { useAuthStore } from '@/store/auth-store'
 import { fullName } from '@/types/user'
 import type { DocumentSummary } from '@/types/document'
 import { documentsKey } from '@/modules/documents/hooks/use-documents'
+import { DocumentHeader } from '@/modules/documents/components/document-header'
 import { useDocumentConnection } from '../hooks/use-document-connection'
 import { CollaborationContext } from '../context/collaboration-context'
 import { ConnectionStatusIndicator } from '../components/connection-status-indicator'
@@ -49,12 +50,7 @@ export function DocumentRoute() {
         connectionStatus={<ConnectionStatusIndicator />}
         presence={<PresenceStack />}
       >
-        <Link
-          to="/documents"
-          className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground transition-colors duration-150 ease-out hover:text-foreground"
-        >
-          ← Back to documents
-        </Link>
+        <DocumentHeader documentId={id} />
         <div className="mt-8">
           <DocumentWorkspace />
         </div>
