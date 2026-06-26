@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Skeleton } from '@/components/custom-components/skeleton'
 import type { WireDocumentStatus } from '@/types/document'
+import { ShareDialog } from '@/modules/sharing/components/share-dialog'
 import { useDocument } from '../hooks/use-document'
 import { InlineDocumentTitle } from './inline-document-title'
 import { DocumentStatusToggle } from './document-status-toggle'
@@ -52,6 +53,7 @@ export function DocumentHeader({ documentId }: { documentId: string }) {
 
         {data && isAuthor && (
           <div className="flex shrink-0 items-center gap-2">
+            <ShareDialog documentId={documentId} />
             <DocumentStatusToggle documentId={documentId} status={data.status} />
             <DeleteDocumentDialog documentId={documentId} title={data.title} />
           </div>

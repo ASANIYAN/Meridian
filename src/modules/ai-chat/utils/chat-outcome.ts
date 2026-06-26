@@ -15,11 +15,12 @@ export function toSuccessOutcome(data: ChatSuccess): ChatOutcome {
 }
 
 /**
- * Map a failed chat request to an outcome by HTTP status (CLAUDE.md §9). Rich
- * `expected_text`/`actual_text` are read only if the body happens to carry them
- * — the GlobalExceptionFilter strips them today, so this is parse-if-present,
- * never assumed. Anything not specifically classified (notably the current
- * generic 500) becomes `kind: 'error'`.
+ * Map a failed chat request to an outcome by HTTP status (CLAUDE.md §9, confirmed
+ * against backend PR #48). 409 carries `operation_index`/`expected_text`/
+ * `actual_text` (forwarded intact by the GlobalExceptionFilter); 422 and 400
+ * carry a `reason` surfaced via `message`. `check` (content_existence vs scope)
+ * is a redundant confirmation of the status code, so we key off status alone.
+ * Anything uncategorized (e.g. a 500 or a network failure) becomes `kind: 'error'`.
  */
 export function toErrorOutcome(error: unknown): ChatOutcome {
   const status = getApiErrorStatus(error)

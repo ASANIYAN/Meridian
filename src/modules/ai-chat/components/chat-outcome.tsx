@@ -121,10 +121,15 @@ function OutcomeBody({ outcome }: { outcome: ChatOutcome }) {
 
     case 'scope':
       return (
-        <p>
-          That instruction was out of scope, so <strong className="font-semibold">nothing was
-          changed</strong>. Try a more specific edit.
-        </p>
+        <div className="space-y-1.5">
+          <p>
+            That instruction was out of scope, so <strong className="font-semibold">nothing was
+            changed</strong>. Try a more specific edit.
+          </p>
+          {outcome.message && (
+            <p className="text-[12.5px] text-muted-foreground">{outcome.message}</p>
+          )}
+        </div>
       )
 
     case 'format':

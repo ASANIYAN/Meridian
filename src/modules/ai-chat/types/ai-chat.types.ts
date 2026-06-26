@@ -7,14 +7,12 @@ export interface RejectedOperation {
 /**
  * The result of one AI instruction, as the chat UI needs to render it (FE-CHAT-3).
  *
- * Five outcomes per CLAUDE.md §9. Two are real today (the `200` success shapes);
- * the three error variants are keyed off HTTP status (409/422/400) and are
- * forward-compatible: the backend currently collapses all three into a generic
- * 500 (the AI domain errors aren't HttpExceptions yet, and the GlobalException-
- * Filter strips custom fields), so today they surface as `kind: 'error'`. Once
- * the backend maps those errors to 409/422/400, the matching branches light up
- * with no frontend change. `expectedText`/`actualText` are parsed only if they
- * ever survive the filter — never depended on.
+ * Five outcomes per CLAUDE.md §9, confirmed against backend PR #48: two `200`
+ * success shapes (full / partial) plus three error variants keyed off HTTP
+ * status — 409 content-existence (carries `operation_index`/`expected_text`/
+ * `actual_text`, forwarded intact by the GlobalExceptionFilter), 422 scope, and
+ * 400 format. `rate-limited` (429) and `error` (anything uncategorized, e.g. a
+ * 500 or a network failure) are non-fatal catch-alls.
  */
 export type ChatOutcome =
   | { kind: 'applied'; operationsApplied: number }
