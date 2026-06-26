@@ -1,17 +1,18 @@
 /**
  * REST error extraction.
  *
- * The backend has no exception filter today (CLAUDE.md §9), so the live shape is
- * the bare class-validator / ValidationPipe default:
+ * The backend's GlobalExceptionFilter standardizes every error to
+ * { statusCode, message, error, timestamp, path } (CLAUDE.md §9). It did NOT
+ * restructure validation failures: a ValidationPipe rejection still carries
+ * `message` as a flat array of constraint sentences —
  *
- *   { statusCode: 400, message: string[] | string, error: "Bad Request" }
+ *   { statusCode: 400, message: string[] | string, error: "Bad Request", timestamp, path }
  *
  * `message` is an array of free-text sentences, each prefixed with the property
- * name ("email must be an email") — NOT a structured { field: reason } map.
- *
- * NOTE: revisit if/when the standardizing exception filter ships and restructures
- * validation failures (e.g. into a { field, constraints }[] array). The fallback
- * chain below is shape-agnostic; only the per-field extraction would change.
+ * name ("email must be an email") — NOT a structured { field: reason } map. The
+ * fallback chain below is shape-agnostic; the per-field extraction walks the flat
+ * array. Some endpoints (AI chat, §9) attach extra top-level fields the filter
+ * forwards — callers read those directly off response.data, not via this module.
  */
 
 const FALLBACK_MESSAGE = 'Something went wrong. Please try again.'
