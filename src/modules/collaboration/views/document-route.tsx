@@ -7,6 +7,7 @@ import { fullName } from '@/types/user'
 import type { DocumentSummary } from '@/types/document'
 import { documentsKey } from '@/modules/documents/hooks/use-documents'
 import { DocumentHeader } from '@/modules/documents/components/document-header'
+import { ChatSidebar } from '@/modules/ai-chat/components/chat-sidebar'
 import { useDocumentConnection } from '../hooks/use-document-connection'
 import { CollaborationContext } from '../context/collaboration-context'
 import { ConnectionStatusIndicator } from '../components/connection-status-indicator'
@@ -55,6 +56,7 @@ export function DocumentRoute() {
           <DocumentWorkspace />
         </div>
       </AppShell>
+      <ChatSidebar />
     </CollaborationContext.Provider>
   )
 }
