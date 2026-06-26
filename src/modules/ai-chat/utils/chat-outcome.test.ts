@@ -58,14 +58,19 @@ describe('toErrorOutcome', () => {
     }
   })
 
-  it('422 → scope, 400 → format, 429 → rate-limited', () => {
-    expect(toErrorOutcome(apiError(422, {})).kind).toBe('scope')
-    expect(toErrorOutcome(apiError(400, {})).kind).toBe('format')
+  it('422 → scope, surfacing the reason via message', () => {
+    const outcome = toErrorOutcome(
+      apiError(422, { check: 'scope', reason: 'exceeds the instruction', message: 'exceeds the instruction' }),
+    )
+    expect(outcome).toEqual({ kind: 'scope', message: 'exceeds the instruction' })
+  })
+
+  it('400 → format, 429 → rate-limited', () => {
+    expect(toErrorOutcome(apiError(400, { reason: 'LLM returned non-JSON' })).kind).toBe('format')
     expect(toErrorOutcome(apiError(429, {})).kind).toBe('rate-limited')
   })
 
-  it("today's generic 500 falls through to a plain error", () => {
-    // The AI domain errors are not HttpExceptions yet, so they surface as 500.
+  it('an uncategorized 500 falls through to a plain error', () => {
     const outcome = toErrorOutcome(apiError(500, { message: 'Internal server error' }))
     expect(outcome).toEqual({ kind: 'error', message: 'Internal server error' })
   })
