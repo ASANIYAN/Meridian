@@ -1,4 +1,5 @@
 import { useAuthStore } from '@/store/auth-store'
+import { useMediaQuery } from '@/lib/use-media-query'
 import { useCollaboration } from '../hooks/use-collaboration'
 import type { PresentUser } from '../types/collaboration.types'
 
@@ -23,7 +24,10 @@ function initials(name: string): string {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
 }
 
-const MAX_AVATARS = 4
+// How many avatars to show before collapsing to +N, by viewport — the header
+// shares its row with the status readout and user menu, so it tightens on narrow
+// widths (Tailwind breakpoints: sm 640px, lg 1024px).
+const AVATAR_LIMITS = { base: 2, sm: 3, lg: 4 }
 
 function Avatar({ user }: { user: PresentUser }) {
   return (
@@ -45,6 +49,10 @@ function Avatar({ user }: { user: PresentUser }) {
 export function PresenceStack() {
   const { presentUsers } = useCollaboration()
   const meId = useAuthStore((s) => s.user?.id)
+  const isSm = useMediaQuery('(min-width: 640px)')
+  const isLg = useMediaQuery('(min-width: 1024px)')
+  const maxAvatars = isLg ? AVATAR_LIMITS.lg : isSm ? AVATAR_LIMITS.sm : AVATAR_LIMITS.base
+
   const others = presentUsers.filter((u) => u.userId !== meId)
 
   if (others.length === 0) {
@@ -55,7 +63,7 @@ export function PresenceStack() {
     )
   }
 
-  const shown = others.slice(0, MAX_AVATARS)
+  const shown = others.slice(0, maxAvatars)
   const overflow = others.length - shown.length
 
   return (
