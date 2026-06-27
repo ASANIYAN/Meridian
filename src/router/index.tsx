@@ -38,7 +38,7 @@ export const router = createBrowserRouter([
   { path: '/forgot-password', element: <ForgotPasswordView /> },
   { path: '/reset-password', element: <ResetPasswordView /> },
   { path: '/resend-verification', element: <ResendVerificationView /> },
-  { path: '/join/:token', element: <ClaimView /> },
+  { path: '/join/:id', element: <ClaimView /> },
 
   // Guarded
   {
