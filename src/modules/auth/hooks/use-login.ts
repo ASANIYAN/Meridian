@@ -2,8 +2,9 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuthStore } from '@/store/auth-store'
+import { sanitizeRedirect } from '@/lib/redirect'
 import { getApiErrorMessage, getApiErrorStatus } from '@/lib/api/get-api-error-message'
 import { decodeJwt } from '@/lib/jwt'
 import type { User } from '@/types/user'
@@ -46,6 +47,7 @@ function userFromToken(token: string, fallbackEmail: string): User {
  */
 export function useLogin() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const setSession = useAuthStore((s) => s.setSession)
   const [unverifiedMessage, setUnverifiedMessage] = useState<string | null>(null)
 
@@ -59,7 +61,10 @@ export function useLogin() {
     mutationFn: login,
     onSuccess: ({ token }, variables) => {
       setSession({ user: userFromToken(token, variables.email), token })
-      navigate('/documents', { replace: true })
+      // Honor a sanitized ?redirect= (e.g. returning to a share-link claim,
+      // FE-SHARE-5); otherwise land on the documents list.
+      const redirect = sanitizeRedirect(searchParams.get('redirect'))
+      navigate(redirect ?? '/documents', { replace: true })
     },
     onError: (error) => {
       const status = getApiErrorStatus(error)
