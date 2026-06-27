@@ -14,7 +14,6 @@ export function LinksPanel({ documentId }: { documentId: string }) {
   const [role, setRole] = useState<GrantableRole>('viewer')
   const [singleUse, setSingleUse] = useState(false)
   const [links, setLinks] = useState<ShareLink[]>([])
-  const [revokingToken, setRevokingToken] = useState<string | null>(null)
 
   const createMutation = useCreateShareLink(documentId)
   const revokeMutation = useRevokeShareLink(documentId)
@@ -26,12 +25,12 @@ export function LinksPanel({ documentId }: { documentId: string }) {
     )
   }
 
+  // Returns the promise so the row's ConfirmDialog can await it — staying open
+  // (and showing pending) until the server actually confirms the revoke.
   function revoke(token: string) {
-    setRevokingToken(token)
-    revokeMutation.mutate(token, {
+    return revokeMutation.mutateAsync(token, {
       onSuccess: () =>
         setLinks((prev) => prev.map((l) => (l.token === token ? { ...l, revoked: true } : l))),
-      onSettled: () => setRevokingToken(null),
     })
   }
 
@@ -85,12 +84,7 @@ export function LinksPanel({ documentId }: { documentId: string }) {
       {links.length > 0 && (
         <ul className="space-y-2">
           {links.map((link) => (
-            <ShareLinkRow
-              key={link.id}
-              link={link}
-              onRevoke={revoke}
-              isRevoking={revokingToken === link.token && revokeMutation.isPending}
-            />
+            <ShareLinkRow key={link.id} link={link} onRevoke={revoke} />
           ))}
         </ul>
       )}

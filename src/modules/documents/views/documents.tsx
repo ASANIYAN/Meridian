@@ -1,7 +1,7 @@
-import { useNavigate } from 'react-router-dom'
 import { AppShell } from '@/components/custom-components/app-shell'
 import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/store/auth-store'
+import { useSignOut } from '@/modules/auth/hooks/use-sign-out'
 import { fullName } from '@/types/user'
 import { useDocuments } from '../hooks/use-documents'
 import { DocumentCard } from '../components/document-card'
@@ -10,17 +10,11 @@ import { CreateDocumentModal } from '../components/create-document-modal'
 
 /** The documents list (FE-DOC-1) — the post-login home, behind the route guard. */
 export function DocumentsView() {
-  const navigate = useNavigate()
   const user = useAuthStore((s) => s.user)
-  const clearSession = useAuthStore((s) => s.clearSession)
+  const signOut = useSignOut()
   const { data, isLoading, isError, refetch } = useDocuments()
 
   if (!user) return null
-
-  const signOut = () => {
-    clearSession()
-    navigate('/login', { replace: true })
-  }
 
   return (
     <AppShell user={{ name: fullName(user), email: user.email }} onSignOut={signOut}>

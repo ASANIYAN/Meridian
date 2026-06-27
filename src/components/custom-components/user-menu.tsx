@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { cn } from '@/lib/utils'
+import { ConfirmDialog } from '@/components/custom-components/confirm-dialog'
 
 interface UserMenuProps {
   name: string
@@ -71,14 +72,22 @@ export function UserMenu({ name, email, onSignOut }: UserMenuProps) {
               <p className="truncate text-[12px] text-muted-foreground">{email}</p>
             </div>
             <div className="my-1 h-px bg-border" />
-            <button
-              type="button"
-              role="menuitem"
-              onClick={onSignOut}
-              className="flex w-full items-center rounded-sm px-2.5 py-2 text-[13px] text-foreground outline-none transition-colors duration-150 ease-out hover:bg-muted focus-visible:bg-muted"
-            >
-              Sign out
-            </button>
+            <ConfirmDialog
+              title="Sign out?"
+              description="You'll need to sign in again to get back to your documents."
+              confirmLabel="Sign out"
+              pendingLabel="Signing out…"
+              onConfirm={() => onSignOut?.()}
+              trigger={
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="flex w-full items-center rounded-sm px-2.5 py-2 text-[13px] text-foreground outline-none transition-colors duration-150 ease-out hover:bg-muted focus-visible:bg-muted"
+                >
+                  Sign out
+                </button>
+              }
+            />
           </div>
         </>
       )}

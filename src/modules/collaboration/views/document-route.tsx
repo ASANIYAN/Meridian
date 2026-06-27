@@ -1,8 +1,9 @@
 import { useMemo } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { AppShell } from '@/components/custom-components/app-shell'
 import { useAuthStore } from '@/store/auth-store'
+import { useSignOut } from '@/modules/auth/hooks/use-sign-out'
 import { fullName } from '@/types/user'
 import type { DocumentSummary } from '@/types/document'
 import { documentsKey } from '@/modules/documents/hooks/use-documents'
@@ -22,10 +23,9 @@ import { DocumentWorkspace } from '../components/document-workspace'
  */
 export function DocumentRoute() {
   const { id = '' } = useParams()
-  const navigate = useNavigate()
   const queryClient = useQueryClient()
   const user = useAuthStore((s) => s.user)
-  const clearSession = useAuthStore((s) => s.clearSession)
+  const signOut = useSignOut()
 
   // Role from the documents cache when we have it; deep-links may not (the
   // backend still enforces access regardless).
@@ -37,11 +37,6 @@ export function DocumentRoute() {
   const connection = useDocumentConnection(id, role)
 
   if (!user) return null
-
-  const signOut = () => {
-    clearSession()
-    navigate('/login', { replace: true })
-  }
 
   return (
     <CollaborationContext.Provider value={connection}>
