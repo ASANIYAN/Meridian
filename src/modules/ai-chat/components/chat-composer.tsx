@@ -36,7 +36,7 @@ export function ChatComposer({ onSend, disabled }: ChatComposerProps) {
         className="max-h-40 w-full resize-none rounded-md border border-border bg-card px-3 py-2 text-[13.5px] leading-relaxed text-foreground outline-none focus-visible:ring-[3px] focus-visible:ring-ring/25"
       />
       <div className="mt-2 flex items-center justify-between">
-        <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
+        <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
           Enter to send
         </p>
         <Button

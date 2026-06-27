@@ -34,7 +34,7 @@ describe('toSuccessOutcome', () => {
 })
 
 describe('toErrorOutcome', () => {
-  it('409 → content-conflict, parsing rich fields when present', () => {
+  it('409; content-conflict, parsing rich fields when present', () => {
     const outcome = toErrorOutcome(
       apiError(409, {
         check: 'content_existence',
@@ -60,7 +60,7 @@ describe('toErrorOutcome', () => {
     }
   })
 
-  it('422 → scope, surfacing the reason via message', () => {
+  it('422; scope, surfacing the reason via message', () => {
     const outcome = toErrorOutcome(
       apiError(422, {
         check: 'scope',
@@ -71,7 +71,7 @@ describe('toErrorOutcome', () => {
     expect(outcome).toEqual({ kind: 'scope', message: 'exceeds the instruction' })
   })
 
-  it('400 → format, 429 → rate-limited', () => {
+  it('400; format, 429 → rate-limited', () => {
     expect(toErrorOutcome(apiError(400, { reason: 'LLM returned non-JSON' })).kind).toBe('format')
     expect(toErrorOutcome(apiError(429, {})).kind).toBe('rate-limited')
   })
