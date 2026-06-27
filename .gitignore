@@ -23,5 +23,11 @@ dist-ssr
 *.sln
 *.sw?
 
+# Playwright (FE-POLISH-4)
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
 CLAUDE.md
 meridian-frontend-backlog.pdf
