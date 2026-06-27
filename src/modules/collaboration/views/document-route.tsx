@@ -41,15 +41,19 @@ export function DocumentRoute() {
   return (
     <CollaborationContext.Provider value={connection}>
       <AppShell
+        bleed
         user={{ name: fullName(user), email: user.email }}
         onSignOut={signOut}
         connectionStatus={<ConnectionStatusIndicator />}
         presence={<PresenceStack />}
       >
-        <DocumentHeader documentId={id} />
-        <div className="mt-8">
-          <DocumentWorkspace />
+        {/* Chrome (title, status, actions) stays on the app surface, constrained. */}
+        <div className="mx-auto w-full max-w-300 px-5 pt-7 pb-5">
+          <DocumentHeader documentId={id} />
         </div>
+        {/* The editor owns the rest of the viewport: a full-bleed canvas that the
+            page sheet floats on (Google-Docs structure). */}
+        <DocumentWorkspace />
       </AppShell>
       <ChatSidebar />
     </CollaborationContext.Provider>
