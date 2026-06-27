@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { AuthNotice } from '../components/auth-notice'
 import { useVerifyEmail } from '../hooks/use-verify-email'
 
-const COORD = '51°28′N · 0°00′W'
+const COORD = ''
 
 export function VerifyEmailView() {
   const { status } = useVerifyEmail()
