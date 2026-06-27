@@ -24,7 +24,7 @@ export function SignupView() {
         {submitted ? (
           <AuthNotice
             tone="sent"
-            coordinate="51°28′N · 0°00′W"
+            coordinate=""
             title="Check your email"
             heading="Confirm your email"
             description={
@@ -37,7 +37,7 @@ export function SignupView() {
           />
         ) : (
           <>
-            <Cartouche coordinate="51°28′N · 0°00′W" title="Create account" />
+            <Cartouche coordinate="" title="Create account" />
             <FormError message={rootError} />
 
             <div className="space-y-4">

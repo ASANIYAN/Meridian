@@ -47,7 +47,7 @@ export function EmailRequestView({
         {hook.submitted ? (
           <AuthNotice
             tone="sent"
-            coordinate="51°28′N · 0°00′W"
+            coordinate=""
             title={title}
             heading={sent.heading}
             description={sent.description}
@@ -55,7 +55,7 @@ export function EmailRequestView({
           />
         ) : (
           <>
-            <Cartouche coordinate="51°28′N · 0°00′W" title={title} />
+            <Cartouche coordinate="" title={title} />
             <FormError message={rootError} />
             <p className="text-[13.5px] leading-relaxed text-muted-foreground">{description}</p>
 

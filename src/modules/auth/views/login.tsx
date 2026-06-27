@@ -14,7 +14,7 @@ export function LoginView() {
   return (
     <AuthLayout>
       <AuthPlate onSubmit={onSubmit}>
-        <Cartouche coordinate="51°28′N · 0°00′W" title="Sign in" />
+        <Cartouche coordinate="" title="Sign in" />
 
         {unverifiedMessage ? (
           <div className="space-y-2 rounded-md border border-border bg-muted/40 px-3.5 py-3 text-[13px] leading-snug text-foreground">
