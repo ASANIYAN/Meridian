@@ -147,11 +147,15 @@
    .meridian-editor so it never leaks into the rest of the app. No typography
    plugin; these are the document's own prose rules. */
 .meridian-editor {
-  min-height: 28rem;
-  padding: 1.75rem 1.5rem;
+  min-height: clamp(28rem, 68vh, 60rem);
+  /* Capped measure inside a wide sheet: side padding absorbs the leftover space
+     beyond ~72ch and centers the text, while the editable element still fills the
+     whole sheet so clicking anywhere focuses it. Floors at 1.5rem on phones,
+     caps so the column stays centered on very wide sheets. */
+  padding: 3.5rem clamp(1.5rem, calc((100% - 72ch) / 2), 12rem);
   font-family: var(--font-sans);
   font-size: 16px;
-  line-height: 1.7;
+  line-height: 1.75;
   color: var(--foreground);
 }
 .meridian-editor :first-child {
@@ -226,6 +230,12 @@
   color: var(--accent);
   text-decoration: underline;
   text-underline-offset: 2px;
+}
+.meridian-editor mark {
+  background-color: color-mix(in srgb, var(--brass) 38%, transparent);
+  color: inherit;
+  border-radius: 2px;
+  padding: 0 0.1em;
 }
 .meridian-editor hr {
   border: none;

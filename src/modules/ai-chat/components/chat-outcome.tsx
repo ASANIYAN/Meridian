@@ -142,6 +142,11 @@ function OutcomeBody({ outcome }: { outcome: ChatOutcome }) {
       return <p>You're sending messages too quickly. Wait a moment, then try again.</p>
 
     case 'error':
-      return <p>{outcome.message}</p>
+      return (
+        <p>
+          Something went wrong on our end and the assistant couldn't finish. Your document is
+          untouched — please try again in a moment.
+        </p>
+      )
   }
 }

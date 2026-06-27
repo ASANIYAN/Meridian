@@ -1,13 +1,17 @@
-import type { ReactNode } from 'react'
 import { type Editor, useEditorState } from '@tiptap/react'
-import { cn } from '@/lib/utils'
+import { ToolbarButton, ToolbarDivider } from './toolbar-button'
+import { ToolbarHeadingMenu } from './toolbar-heading-menu'
+import { ToolbarAlignMenu } from './toolbar-align-menu'
+import { ToolbarLinkPopover } from './toolbar-link-popover'
 
 /**
  * The editor's formatting toolbar (CLAUDE.md §2/§5 — fully custom, no shadcn
- * primitive). Presentational: it reads the active-mark state off the passed
- * editor instance and dispatches Tiptap commands, owning no lifecycle of its
- * own. `useEditorState` subscribes to just the flags it renders so it re-renders
- * on selection changes without re-rendering the whole editor on every keystroke.
+ * primitive for it). Controls share one brand vocabulary: letterforms for marks
+ * (B/I/U/S), matched-weight glyphs for blocks, and mono text triggers for the
+ * block-type and alignment menus — deliberately not a third-party icon set.
+ *
+ * `useEditorState` subscribes to just the flags rendered here, so the toolbar
+ * re-renders on selection changes without re-rendering on every keystroke.
  */
 export function EditorToolbar({ editor }: { editor: Editor }) {
   const state = useEditorState({
@@ -17,9 +21,9 @@ export function EditorToolbar({ editor }: { editor: Editor }) {
       italic: e.isActive('italic'),
       underline: e.isActive('underline'),
       strike: e.isActive('strike'),
+      highlight: e.isActive('highlight'),
       code: e.isActive('code'),
-      h1: e.isActive('heading', { level: 1 }),
-      h2: e.isActive('heading', { level: 2 }),
+      link: e.isActive('link'),
       bulletList: e.isActive('bulletList'),
       orderedList: e.isActive('orderedList'),
       blockquote: e.isActive('blockquote'),
@@ -29,27 +33,10 @@ export function EditorToolbar({ editor }: { editor: Editor }) {
   })
 
   return (
-    <div
-      role="toolbar"
-      aria-label="Formatting"
-      className="flex flex-wrap items-center gap-0.5 border-b border-border px-2 py-1.5"
-    >
-      <ToolbarButton
-        label="Heading 1"
-        active={state.h1}
-        onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-      >
-        <span className="font-display text-[13px] font-semibold leading-none">H1</span>
-      </ToolbarButton>
-      <ToolbarButton
-        label="Heading 2"
-        active={state.h2}
-        onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-      >
-        <span className="font-display text-[13px] font-semibold leading-none">H2</span>
-      </ToolbarButton>
+    <div role="toolbar" aria-label="Formatting" className="flex flex-wrap items-center gap-px py-1">
+      <ToolbarHeadingMenu editor={editor} />
 
-      <Divider />
+      <ToolbarDivider />
 
       <ToolbarButton
         label="Bold"
@@ -63,7 +50,7 @@ export function EditorToolbar({ editor }: { editor: Editor }) {
         active={state.italic}
         onClick={() => editor.chain().focus().toggleItalic().run()}
       >
-        <span className="text-[13px] italic leading-none">I</span>
+        <span className="font-display text-[14px] italic leading-none">I</span>
       </ToolbarButton>
       <ToolbarButton
         label="Underline"
@@ -80,21 +67,31 @@ export function EditorToolbar({ editor }: { editor: Editor }) {
         <span className="text-[13px] leading-none line-through">S</span>
       </ToolbarButton>
       <ToolbarButton
+        label="Highlight"
+        active={state.highlight}
+        onClick={() => editor.chain().focus().toggleHighlight().run()}
+      >
+        <span className="rounded-[2px] bg-brass/35 px-1 text-[12px] font-semibold leading-none text-foreground">
+          A
+        </span>
+      </ToolbarButton>
+      <ToolbarButton
         label="Inline code"
         active={state.code}
         onClick={() => editor.chain().focus().toggleCode().run()}
       >
         <span className="font-mono text-[12px] leading-none">{'</>'}</span>
       </ToolbarButton>
+      <ToolbarLinkPopover editor={editor} active={state.link} />
 
-      <Divider />
+      <ToolbarDivider />
 
       <ToolbarButton
         label="Bullet list"
         active={state.bulletList}
         onClick={() => editor.chain().focus().toggleBulletList().run()}
       >
-        <span className="text-[14px] leading-none">•</span>
+        <span className="text-[15px] leading-none">•</span>
       </ToolbarButton>
       <ToolbarButton
         label="Numbered list"
@@ -108,10 +105,14 @@ export function EditorToolbar({ editor }: { editor: Editor }) {
         active={state.blockquote}
         onClick={() => editor.chain().focus().toggleBlockquote().run()}
       >
-        <span className="font-display text-[15px] leading-none">&ldquo;</span>
+        <span className="font-display text-[16px] leading-none">&ldquo;</span>
       </ToolbarButton>
 
-      <Divider />
+      <ToolbarDivider />
+
+      <ToolbarAlignMenu editor={editor} />
+
+      <ToolbarDivider />
 
       <ToolbarButton
         label="Undo"
@@ -129,37 +130,4 @@ export function EditorToolbar({ editor }: { editor: Editor }) {
       </ToolbarButton>
     </div>
   )
-}
-
-interface ToolbarButtonProps {
-  label: string
-  active?: boolean
-  disabled?: boolean
-  onClick: () => void
-  children: ReactNode
-}
-
-function ToolbarButton({ label, active, disabled, onClick, children }: ToolbarButtonProps) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      aria-label={label}
-      aria-pressed={active}
-      title={label}
-      className={cn(
-        'grid size-8 place-items-center rounded-md text-foreground transition-colors duration-150 ease-out',
-        'hover:bg-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/35',
-        'disabled:pointer-events-none disabled:opacity-40',
-        active && 'bg-muted text-accent-foreground ring-1 ring-accent/40',
-      )}
-    >
-      {children}
-    </button>
-  )
-}
-
-function Divider() {
-  return <span aria-hidden className="mx-1 h-5 w-px bg-border" />
 }

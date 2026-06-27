@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Skeleton } from '@/components/custom-components/skeleton'
+import { StatusBadge } from '@/components/custom-components/status-badge'
 import type { WireDocumentStatus } from '@/types/document'
 import { ShareDialog } from '@/modules/sharing/components/share-dialog'
 import { useDocument } from '../hooks/use-document'
@@ -12,6 +13,15 @@ const STATUS_LABEL: Record<WireDocumentStatus, string> = {
   active: 'Active',
   inactive: 'Inactive',
   deleted: 'Deleted',
+}
+
+// Same dot-color logic as the connection indicator, so document status reads as
+// part of one status system (moss = healthy/active, brass = in-between, etc.).
+const STATUS_COLOR: Record<WireDocumentStatus, string> = {
+  draft: 'var(--brass)',
+  active: 'var(--presence-moss)',
+  inactive: 'var(--slate)',
+  deleted: 'var(--presence-coral)',
 }
 
 /**
@@ -32,12 +42,12 @@ export function DocumentHeader({ documentId }: { documentId: string }) {
     <div>
       <Link
         to="/documents"
-        className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground transition-colors duration-150 ease-out hover:text-foreground"
+        className="font-mono text-[11px] uppercase tracking-widest text-foreground/70 transition-colors duration-150 ease-out hover:text-foreground"
       >
         ← Back to documents
       </Link>
 
-      <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+      <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <div className="min-w-0 flex-1">
           {data ? (
             <InlineDocumentTitle documentId={documentId} title={data.title} canEdit={canEdit} />
@@ -45,9 +55,11 @@ export function DocumentHeader({ documentId }: { documentId: string }) {
             <Skeleton className="h-8 w-64 max-w-full" />
           )}
           {data && (
-            <p className="mt-1.5 font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
-              {STATUS_LABEL[data.status]}
-            </p>
+            <StatusBadge
+              className="mt-2"
+              label={STATUS_LABEL[data.status]}
+              color={STATUS_COLOR[data.status]}
+            />
           )}
         </div>
 
@@ -55,6 +67,7 @@ export function DocumentHeader({ documentId }: { documentId: string }) {
           <div className="flex shrink-0 flex-wrap items-center gap-2">
             <ShareDialog documentId={documentId} />
             <DocumentStatusToggle documentId={documentId} status={data.status} />
+            <span aria-hidden="true" className="mx-1 hidden h-6 w-px bg-border sm:block" />
             <DeleteDocumentDialog documentId={documentId} title={data.title} />
           </div>
         )}

@@ -13,7 +13,7 @@ export function DocumentWorkspace() {
 
   if (!ready) {
     return (
-      <div className="grid place-items-center py-24 text-center">
+      <div className="flex flex-1 items-center justify-center bg-muted/60 text-center">
         <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
           Connecting to the document…
         </p>
@@ -21,9 +21,5 @@ export function DocumentWorkspace() {
     )
   }
 
-  return (
-    <div className="mx-auto max-w-[72ch]">
-      <DocumentEditor doc={doc} editable={role !== 'viewer'} />
-    </div>
-  )
+  return <DocumentEditor doc={doc} editable={role !== 'viewer'} />
 }

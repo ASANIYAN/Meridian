@@ -3,6 +3,8 @@ import { EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Collaboration from '@tiptap/extension-collaboration'
 import Placeholder from '@tiptap/extension-placeholder'
+import TextAlign from '@tiptap/extension-text-align'
+import Highlight from '@tiptap/extension-highlight'
 import type * as Y from 'yjs'
 import { EditorToolbar } from './editor-toolbar'
 
@@ -27,8 +29,12 @@ export function DocumentEditor({ doc, editable }: DocumentEditorProps) {
     {
       editable,
       extensions: [
-        StarterKit.configure({ undoRedo: false }),
+        // undoRedo off → Collaboration owns history; openOnClick off → clicking a
+        // link places the cursor for editing rather than navigating away.
+        StarterKit.configure({ undoRedo: false, link: { openOnClick: false } }),
         Collaboration.configure({ document: doc }),
+        TextAlign.configure({ types: ['heading', 'paragraph'] }),
+        Highlight,
         Placeholder.configure({
           placeholder: editable ? 'Start writing…' : 'This document is empty.',
         }),
@@ -50,9 +56,31 @@ export function DocumentEditor({ doc, editable }: DocumentEditorProps) {
   }, [editor, editable])
 
   return (
-    <div className="overflow-hidden rounded-md border border-border bg-card">
-      {editable && editor && <EditorToolbar editor={editor} />}
-      <EditorContent editor={editor} />
-    </div>
+    <>
+      {/* Formatting bar — a full-width band on the app surface that sticks under
+          the app header (h-15) as you scroll, controls centered to the page
+          column. Viewers get a read-only marker instead. */}
+      <div className="sticky top-15 z-20 border-y border-border bg-background/90 backdrop-blur-sm">
+        <div className="mx-auto w-full max-w-5xl px-5">
+          {editable && editor ? (
+            <EditorToolbar editor={editor} />
+          ) : (
+            <p className="py-2.5 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+              Read-only · viewer
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* The canvas — a full-bleed grey "desk" that fills the rest of the
+          viewport, with the white page sheet floating centered on it (Google-Docs
+          structure). flex-1 makes it grow to fill; the page keeps its own
+          min-height so the sheet always reads as a page. */}
+      <div className="flex-1 bg-muted/60 px-4 py-8 sm:px-6">
+        <div className="mx-auto max-w-5xl rounded-lg border border-border bg-card shadow-[0_1px_2px_rgba(15,26,42,0.05),0_18px_44px_-24px_rgba(15,26,42,0.22)]">
+          <EditorContent editor={editor} />
+        </div>
+      </div>
+    </>
   )
 }
