@@ -176,18 +176,21 @@
 .graticule-node-converging {
   animation: node-pulse 1900ms ease-in-out infinite;
 }
-@keyframes toast-in {
-  from {
+/* Toasts are added rapidly and stacked, so the entrance is a transition (with
+   @starting-style) rather than a keyframe — a transition retargets smoothly when
+   a new toast pushes the stack mid-animation; a keyframe restarts from zero. */
+.toast {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition:
+    opacity 220ms ease-out,
+    transform 220ms ease-out;
+}
+@starting-style {
+  .toast {
     opacity: 0;
     transform: translateY(12px) scale(0.98);
   }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-.toast-in {
-  animation: toast-in 220ms ease-out;
 }
 @keyframes overlay-in {
   from {
@@ -197,21 +200,44 @@
     opacity: 1;
   }
 }
+@keyframes overlay-out {
+  to {
+    opacity: 0;
+  }
+}
+/* Centering lives on the `translate` property (Tailwind v4's -translate-x/y
+   utilities compile to it, not to `transform`). The entrance therefore animates
+   `transform` only — scale + a subtle rise — so the two compose instead of
+   stacking into a double offset. */
 @keyframes dialog-in {
   from {
     opacity: 0;
-    transform: translate(-50%, -48%) scale(0.96);
+    transform: translateY(6px) scale(0.96);
   }
   to {
     opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes dialog-out {
+  to {
+    opacity: 0;
+    transform: translateY(4px) scale(0.97);
   }
 }
 .dialog-overlay[data-state='open'] {
   animation: overlay-in 150ms ease-out;
 }
+.dialog-overlay[data-state='closed'] {
+  animation: overlay-out 120ms ease-out;
+}
 .dialog-content[data-state='open'] {
   animation: dialog-in 180ms ease-out;
+}
+/* Exit is snappier than the entrance (asymmetric timing — fast where the system
+   is responding). Radix keeps the node mounted until this animation ends. */
+.dialog-content[data-state='closed'] {
+  animation: dialog-out 120ms ease-out;
 }
 /* Right-edge slide-over (AI assistant sidebar, FE-CHAT-1). */
 @keyframes slide-in-right {
@@ -221,6 +247,24 @@
   to {
     transform: translateX(0);
   }
+}
+@keyframes slide-out-right {
+  to {
+    transform: translateX(100%);
+  }
+}
+.chat-overlay[data-state='open'] {
+  animation: overlay-in 150ms ease-out;
+}
+.chat-overlay[data-state='closed'] {
+  animation: overlay-out 140ms ease-out;
+}
+.chat-panel[data-state='open'] {
+  animation: slide-in-right 180ms ease-out;
+}
+/* Exit snappier than entrance; the panel stays mounted until this animation ends. */
+.chat-panel[data-state='closed'] {
+  animation: slide-out-right 140ms cubic-bezier(0.32, 0.72, 0, 1);
 }
 .rise {
   opacity: 0;
@@ -267,11 +311,19 @@
   .graticule-node-converging {
     animation: none;
   }
-  .toast-in {
-    animation: none;
+  .toast {
+    transition: opacity 220ms ease;
   }
   .dialog-overlay[data-state='open'],
-  .dialog-content[data-state='open'] {
+  .dialog-overlay[data-state='closed'],
+  .dialog-content[data-state='open'],
+  .dialog-content[data-state='closed'] {
+    animation: none;
+  }
+  .chat-overlay[data-state='open'],
+  .chat-overlay[data-state='closed'],
+  .chat-panel[data-state='open'],
+  .chat-panel[data-state='closed'] {
     animation: none;
   }
   .rise {
