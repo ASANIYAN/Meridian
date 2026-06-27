@@ -24,7 +24,7 @@ export function ChatThread({ turns }: { turns: ChatTurn[] }) {
   }
 
   return (
-    <div className="flex-1 space-y-5 overflow-y-auto px-4 py-4">
+    <div className="flex-1 space-y-5 overflow-y-auto overscroll-contain px-4 py-4">
       {turns.map((turn) => (
         <div key={turn.id} className="space-y-2">
           <div className="flex justify-end">
