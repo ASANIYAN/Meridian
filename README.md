@@ -1,75 +1,68 @@
-# React + TypeScript + Vite
+# Meridian — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+[![CI](https://github.com/ASANIYAN/Meridian/actions/workflows/ci.yml/badge.svg)](https://github.com/ASANIYAN/Meridian/actions/workflows/ci.yml)
 
-Currently, two official plugins are available:
+Meridian is a real-time collaborative document editor — Google Docs–style continuous prose, not block-based. Each document has three roles (Author, Editor, Viewer); authors get an AI chatbot that edits the document on their behalf, and can share documents via tokenized invite links with a configurable role and expiry.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+This repository is the **frontend** — an authenticated single-page app. The backend (NestJS WebSocket gateway, Redis pub/sub, Postgres/Drizzle) is a separate service and is treated here as a fixed contract.
 
-## React Compiler
+## Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Vite** + **React** + **TypeScript** — an authenticated SPA, no SSR/SEO needs
+- **Tailwind CSS** + **shadcn/ui** — primitives in `components/ui/`, compositions in `components/custom-components/`
+- **React Router** for routing, **TanStack Query** for all REST data, **Zustand** for session/auth + toasts
+- **React Hook Form** + **Zod** for forms and validation
+- **Tiptap** (ProseMirror) with **Yjs** for the collaborative editor, over a hand-written WebSocket provider that speaks the backend's mixed JSON/binary protocol
 
-## Expanding the ESLint configuration
+## Getting started
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Requires **Node 22+**.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+cp .env.example .env.local   # then adjust the URLs if needed
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Environment
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Both are validated at startup (`src/config/env.ts`) and must be valid URLs:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+| Variable       | Description                                               | Example                 |
+| -------------- | --------------------------------------------------------- | ----------------------- |
+| `VITE_API_URL` | REST API origin (the `/v1` prefix is added by the client) | `http://localhost:8000` |
+| `VITE_WS_URL`  | WebSocket gateway origin (separate port from REST)        | `ws://localhost:8001`   |
+
+In development the Vite dev server proxies `/v1` to `VITE_API_URL`; in production nginx does the same (see [Dockerfile](Dockerfile) / [nginx.conf.template](nginx.conf.template)).
+
+## Scripts
+
+| Script             | What it does                                |
+| ------------------ | ------------------------------------------- |
+| `npm run dev`      | Vite dev server                             |
+| `npm run build`    | Typecheck (`tsc -b`) + production bundle    |
+| `npm run preview`  | Serve the production build locally          |
+| `npm run lint`     | ESLint                                      |
+| `npm run format`   | Prettier (write) · `format:check` to verify |
+| `npm test`         | Unit tests (Vitest)                         |
+| `npm run test:e2e` | End-to-end smoke tests (Playwright)         |
+
+A Husky pre-commit hook runs `lint-staged` (Prettier + ESLint) on staged files.
+
+## Testing & CI
+
+Unit tests live alongside source in `src/**` (Vitest); end-to-end smoke tests live in `e2e/` (Playwright, backend calls mocked). Both run on every pull request via [GitHub Actions](.github/workflows/ci.yml), alongside lint, format, and build checks.
+
+```bash
+npx playwright install chromium   # one-time, before the first e2e run
+npm run test:e2e
 ```
 
-# Meridian
+## Production image
+
+```bash
+docker build -t meridian-frontend --build-arg VITE_WS_URL=wss://your-gateway .
+docker run -p 8080:80 -e API_UPSTREAM=http://your-api:8000 meridian-frontend
+```
+
+Multi-stage build (Node → nginx); nginx serves the SPA with history fallback and same-origin-proxies `/v1` to `API_UPSTREAM`.
