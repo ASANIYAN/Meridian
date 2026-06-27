@@ -4,6 +4,7 @@ import { useMutation } from '@tanstack/react-query'
 import { signup } from '../api/auth-api'
 import { signupSchema, type SignupValues } from '../utils/schemas'
 import { applyApiErrorsToForm } from '@/lib/forms/apply-api-errors'
+import { useToastStore } from '@/store/toast-store'
 
 const KNOWN_FIELDS = ['firstName', 'lastName', 'email', 'password'] as const
 
@@ -13,6 +14,7 @@ const KNOWN_FIELDS = ['firstName', 'lastName', 'email', 'password'] as const
  * duplicate-email response surfaces through the REST error utility.
  */
 export function useSignup() {
+  const addToast = useToastStore((s) => s.addToast)
   const form = useForm<SignupValues>({
     resolver: zodResolver(signupSchema),
     mode: 'onBlur',
@@ -21,6 +23,8 @@ export function useSignup() {
 
   const mutation = useMutation({
     mutationFn: signup,
+    onSuccess: () =>
+      addToast({ message: 'Account created — check your email.', variant: 'success' }),
     onError: (error) => applyApiErrorsToForm(form.setError, error, KNOWN_FIELDS),
   })
 

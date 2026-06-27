@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
 import { getApiErrorStatus } from '@/lib/api/get-api-error-message'
+import { useToastStore } from '@/store/toast-store'
 import { forgotPassword, resendVerification } from '../api/auth-api'
 import { emailRequestSchema, type EmailRequestValues } from '../utils/schemas'
 
@@ -13,8 +14,9 @@ import { emailRequestSchema, type EmailRequestValues } from '../utils/schemas'
  * exists. The one exception is a 429, which shows a friendly retry message
  * instead of the confirmation (CLAUDE.md §9).
  */
-function useEmailRequest(request: (email: string) => Promise<void>) {
+function useEmailRequest(request: (email: string) => Promise<void>, successToast: string) {
   const [done, setDone] = useState(false)
+  const addToast = useToastStore((s) => s.addToast)
 
   const form = useForm<EmailRequestValues>({
     resolver: zodResolver(emailRequestSchema),
@@ -24,7 +26,12 @@ function useEmailRequest(request: (email: string) => Promise<void>) {
 
   const mutation = useMutation({
     mutationFn: (values: EmailRequestValues) => request(values.email),
-    onSuccess: () => setDone(true),
+    onSuccess: () => {
+      setDone(true)
+      // Only on a real 200 — the error path below also shows the confirmation
+      // (to never leak whether an account exists), but isn't a genuine success.
+      addToast({ message: successToast, variant: 'success' })
+    },
     onError: (error) => {
       const status = getApiErrorStatus(error)
       if (status === 429) {
@@ -44,5 +51,7 @@ function useEmailRequest(request: (email: string) => Promise<void>) {
   return { form, onSubmit, isPending: mutation.isPending, submitted: done }
 }
 
-export const useForgotPassword = () => useEmailRequest(forgotPassword)
-export const useResendVerification = () => useEmailRequest(resendVerification)
+export const useForgotPassword = () =>
+  useEmailRequest(forgotPassword, 'Check your email for a reset link.')
+export const useResendVerification = () =>
+  useEmailRequest(resendVerification, 'Check your email for a new verification link.')

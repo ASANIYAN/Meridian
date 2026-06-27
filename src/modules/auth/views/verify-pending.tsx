@@ -1,8 +1,10 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { AuthLayout } from '@/components/custom-components/auth-layout'
 import { AuthPlate } from '@/components/custom-components/auth-plate'
 import { Button } from '@/components/ui/button'
+import { ConfirmDialog } from '@/components/custom-components/confirm-dialog'
 import { useAuthStore } from '@/store/auth-store'
+import { useSignOut } from '../hooks/use-sign-out'
 import { AuthNotice } from '../components/auth-notice'
 
 /**
@@ -10,14 +12,8 @@ import { AuthNotice } from '../components/auth-notice'
  * a dead end until they verify, with a resend path and a way out.
  */
 export function VerifyPendingView() {
-  const navigate = useNavigate()
   const email = useAuthStore((s) => s.user?.email)
-  const clearSession = useAuthStore((s) => s.clearSession)
-
-  const signOut = () => {
-    clearSession()
-    navigate('/login', { replace: true })
-  }
+  const signOut = useSignOut()
 
   return (
     <AuthLayout
@@ -30,7 +26,7 @@ export function VerifyPendingView() {
       <AuthPlate>
         <AuthNotice
           tone="sent"
-          coordinate="51°28′N · 0°00′W"
+          coordinate=""
           title="Verify email"
           heading="Confirm your email"
           description={
@@ -51,13 +47,21 @@ export function VerifyPendingView() {
             </Button>
           }
         />
-        <button
-          type="button"
-          onClick={signOut}
-          className="mx-auto block font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground transition-colors duration-150 ease-out hover:text-brass-soft"
-        >
-          Sign out
-        </button>
+        <ConfirmDialog
+          title="Sign out?"
+          description="You can come back and verify from this email any time."
+          confirmLabel="Sign out"
+          pendingLabel="Signing out…"
+          onConfirm={signOut}
+          trigger={
+            <button
+              type="button"
+              className="mx-auto block font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground transition-colors duration-150 ease-out hover:text-brass-soft"
+            >
+              Sign out
+            </button>
+          }
+        />
       </AuthPlate>
     </AuthLayout>
   )

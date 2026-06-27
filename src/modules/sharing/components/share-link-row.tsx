@@ -1,15 +1,15 @@
 import { cn } from '@/lib/utils'
+import { ConfirmDialog } from '@/components/custom-components/confirm-dialog'
 import type { ShareLink } from '../types/sharing.types'
 import { CopyButton } from './copy-button'
 
 interface ShareLinkRowProps {
   link: ShareLink
-  onRevoke: (token: string) => void
-  isRevoking: boolean
+  onRevoke: (token: string) => Promise<unknown>
 }
 
 /** One generated share link (FE-SHARE-4): role, the copyable URL, and revoke. */
-export function ShareLinkRow({ link, onRevoke, isRevoking }: ShareLinkRowProps) {
+export function ShareLinkRow({ link, onRevoke }: ShareLinkRowProps) {
   return (
     <li className="space-y-2 rounded-md border border-border bg-card px-3 py-2.5">
       <div className="flex items-center gap-2">
@@ -41,14 +41,22 @@ export function ShareLinkRow({ link, onRevoke, isRevoking }: ShareLinkRowProps) 
       </div>
 
       {!link.revoked && (
-        <button
-          type="button"
-          onClick={() => onRevoke(link.token)}
-          disabled={isRevoking}
-          className="text-[12px] font-medium text-muted-foreground outline-none transition-colors duration-150 ease-out hover:text-presence-coral focus-visible:ring-[3px] focus-visible:ring-ring/35 disabled:opacity-50"
-        >
-          {isRevoking ? 'Revoking…' : 'Revoke link'}
-        </button>
+        <ConfirmDialog
+          tone="danger"
+          title="Revoke this link?"
+          description="Anyone holding it loses access immediately, and the link can't be reactivated. People who already joined keep their access."
+          confirmLabel="Revoke link"
+          pendingLabel="Revoking…"
+          onConfirm={() => onRevoke(link.token)}
+          trigger={
+            <button
+              type="button"
+              className="text-[12px] font-medium text-muted-foreground outline-none transition-colors duration-150 ease-out hover:text-presence-coral focus-visible:ring-[3px] focus-visible:ring-ring/35"
+            >
+              Revoke link
+            </button>
+          }
+        />
       )}
     </li>
   )

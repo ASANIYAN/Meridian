@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuthStore } from '@/store/auth-store'
+import { useToastStore } from '@/store/toast-store'
 import { sanitizeRedirect } from '@/lib/redirect'
 import { getApiErrorMessage, getApiErrorStatus } from '@/lib/api/get-api-error-message'
 import { decodeJwt } from '@/lib/jwt'
@@ -49,6 +50,7 @@ export function useLogin() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const setSession = useAuthStore((s) => s.setSession)
+  const addToast = useToastStore((s) => s.addToast)
   const [unverifiedMessage, setUnverifiedMessage] = useState<string | null>(null)
 
   const form = useForm<LoginValues>({
@@ -61,6 +63,7 @@ export function useLogin() {
     mutationFn: login,
     onSuccess: ({ token }, variables) => {
       setSession({ user: userFromToken(token, variables.email), token })
+      addToast({ message: 'Signed in.', variant: 'success' })
       // Honor a sanitized ?redirect= (e.g. returning to a share-link claim,
       // FE-SHARE-5); otherwise land on the documents list.
       const redirect = sanitizeRedirect(searchParams.get('redirect'))
