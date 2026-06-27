@@ -13,7 +13,13 @@ export function ResetPasswordView() {
   const rootError = form.formState.errors.root?.message
 
   return (
-    <AuthLayout lede={<>Set a new <em className="italic text-brass-soft">bearing</em>.</>}>
+    <AuthLayout
+      lede={
+        <>
+          Set a new <em className="italic text-brass-soft">bearing</em>.
+        </>
+      }
+    >
       <AuthPlate onSubmit={onSubmit}>
         {!hasToken ? (
           <AuthNotice

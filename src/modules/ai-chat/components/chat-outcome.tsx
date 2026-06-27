@@ -97,8 +97,10 @@ function OutcomeBody({ outcome }: { outcome: ChatOutcome }) {
         <div className="space-y-2">
           <p>
             The document changed between when the assistant read it and when it tried to edit
-            {typeof outcome.operationIndex === 'number' ? ` (operation #${outcome.operationIndex})` : ''}.
-            Nothing was applied — review the change and try again.
+            {typeof outcome.operationIndex === 'number'
+              ? ` (operation #${outcome.operationIndex})`
+              : ''}
+            . Nothing was applied — review the change and try again.
           </p>
           {outcome.expectedText !== undefined && outcome.actualText !== undefined && (
             <dl className="space-y-1.5 text-[12.5px]">
@@ -123,8 +125,9 @@ function OutcomeBody({ outcome }: { outcome: ChatOutcome }) {
       return (
         <div className="space-y-1.5">
           <p>
-            That instruction was out of scope, so <strong className="font-semibold">nothing was
-            changed</strong>. Try a more specific edit.
+            That instruction was out of scope, so{' '}
+            <strong className="font-semibold">nothing was changed</strong>. Try a more specific
+            edit.
           </p>
           {outcome.message && (
             <p className="text-[12.5px] text-muted-foreground">{outcome.message}</p>

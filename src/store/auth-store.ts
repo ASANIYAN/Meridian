@@ -23,8 +23,7 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       token: null,
       isVerified: false,
-      setSession: ({ user, token }) =>
-        set({ user, token, isVerified: user.verifiedAt !== null }),
+      setSession: ({ user, token }) => set({ user, token, isVerified: user.verifiedAt !== null }),
       clearSession: () => set({ user: null, token: null, isVerified: false }),
     }),
     { name: 'meridian-auth' },

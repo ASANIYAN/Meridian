@@ -18,15 +18,22 @@ describe('flattenParticipants', () => {
 
 describe('parsePresenceFrame', () => {
   it('parses a presence frame (type/userId/name/status)', () => {
-    expect(parsePresenceFrame({ type: 'presence', userId: 'u1', name: 'Ada', status: 'online' })).toEqual({
+    expect(
+      parsePresenceFrame({ type: 'presence', userId: 'u1', name: 'Ada', status: 'online' }),
+    ).toEqual({
       user: { userId: 'u1', displayName: 'Ada' },
       status: 'online',
     })
   })
 
   it('defaults a missing/odd status to online', () => {
-    expect(parsePresenceFrame({ type: 'presence', userId: 'u1', name: 'Ada' })?.status).toBe('online')
-    expect(parsePresenceFrame({ type: 'presence', userId: 'u1', name: 'Ada', status: 'offline' })?.status).toBe('offline')
+    expect(parsePresenceFrame({ type: 'presence', userId: 'u1', name: 'Ada' })?.status).toBe(
+      'online',
+    )
+    expect(
+      parsePresenceFrame({ type: 'presence', userId: 'u1', name: 'Ada', status: 'offline' })
+        ?.status,
+    ).toBe('offline')
   })
 
   it('rejects non-presence frames and missing userId', () => {

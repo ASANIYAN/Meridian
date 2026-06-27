@@ -29,15 +29,16 @@ export function useVerifyEmail(): { status: VerifyStatus } {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [email, token])
 
-  const status: VerifyStatus = !email || !token
-    ? 'error'
-    : mutation.isSuccess
-      ? mutation.data?.alreadyVerified
-        ? 'already-verified'
-        : 'success'
-      : mutation.isError
-        ? 'error'
-        : 'pending'
+  const status: VerifyStatus =
+    !email || !token
+      ? 'error'
+      : mutation.isSuccess
+        ? mutation.data?.alreadyVerified
+          ? 'already-verified'
+          : 'success'
+        : mutation.isError
+          ? 'error'
+          : 'pending'
 
   return { status }
 }

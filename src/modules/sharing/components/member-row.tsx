@@ -17,7 +17,13 @@ function initials(first: string, last: string) {
 
 /** One member in the panel (FE-SHARE-2): identity, role control, remove. The
  *  author's row is read-only; editor/viewer rows get a role select + remove. */
-export function MemberRow({ member, canManage, onRoleChange, onRemove, isRemoving }: MemberRowProps) {
+export function MemberRow({
+  member,
+  canManage,
+  onRoleChange,
+  onRemove,
+  isRemoving,
+}: MemberRowProps) {
   const [confirming, setConfirming] = useState(false)
 
   return (

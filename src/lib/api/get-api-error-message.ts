@@ -31,9 +31,7 @@ interface ApiError {
 /** True for an axios/fetch-style error carrying a parsed JSON body. */
 export function isApiError(error: unknown): error is ApiError {
   return (
-    typeof error === 'object' &&
-    error !== null &&
-    ('response' in error || 'isAxiosError' in error)
+    typeof error === 'object' && error !== null && ('response' in error || 'isAxiosError' in error)
   )
 }
 

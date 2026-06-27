@@ -11,7 +11,13 @@ export function VerifyEmailView() {
   const { status } = useVerifyEmail()
 
   return (
-    <AuthLayout lede={<>The last line before you <em className="italic text-brass-soft">converge</em>.</>}>
+    <AuthLayout
+      lede={
+        <>
+          The last line before you <em className="italic text-brass-soft">converge</em>.
+        </>
+      }
+    >
       <AuthPlate>
         {status === 'pending' && (
           <AuthNotice

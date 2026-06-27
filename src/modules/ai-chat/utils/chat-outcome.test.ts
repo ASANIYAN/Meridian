@@ -15,7 +15,9 @@ describe('toSuccessOutcome', () => {
   })
 
   it('an empty rejected_operations array is still a full success', () => {
-    expect(toSuccessOutcome({ operations_applied: 2, rejected_operations: [] }).kind).toBe('applied')
+    expect(toSuccessOutcome({ operations_applied: 2, rejected_operations: [] }).kind).toBe(
+      'applied',
+    )
   })
 
   it('is a partial success when some operations were skipped', () => {
@@ -60,7 +62,11 @@ describe('toErrorOutcome', () => {
 
   it('422 → scope, surfacing the reason via message', () => {
     const outcome = toErrorOutcome(
-      apiError(422, { check: 'scope', reason: 'exceeds the instruction', message: 'exceeds the instruction' }),
+      apiError(422, {
+        check: 'scope',
+        reason: 'exceeds the instruction',
+        message: 'exceeds the instruction',
+      }),
     )
     expect(outcome).toEqual({ kind: 'scope', message: 'exceeds the instruction' })
   })

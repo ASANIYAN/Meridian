@@ -27,7 +27,13 @@ function DialogContent({
           aria-label="Close"
           className="absolute right-4 top-4 rounded-sm p-1 text-muted-foreground outline-none transition-colors duration-150 ease-out hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/35"
         >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="size-4">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            className="size-4"
+          >
             <line x1="6" y1="6" x2="18" y2="18" />
             <line x1="6" y1="18" x2="18" y2="6" />
           </svg>
@@ -41,10 +47,7 @@ function DialogHeader({ className, ...props }: React.ComponentProps<'div'>) {
   return <div className={cn('mb-5 space-y-1.5', className)} {...props} />
 }
 
-function DialogTitle({
-  className,
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Title>) {
+function DialogTitle({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Title>) {
   return (
     <DialogPrimitive.Title
       className={cn('font-display text-[1.375rem] leading-tight text-foreground', className)}

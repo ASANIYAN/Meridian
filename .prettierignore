@@ -1,0 +1,10 @@
+# Build output & deps
+dist
+coverage
+node_modules
+
+# Lockfile — managed by npm, never reformat
+package-lock.json
+
+# Generated / vendor
+*.min.js
