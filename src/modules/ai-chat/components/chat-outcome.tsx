@@ -1,5 +1,6 @@
 import { cn } from '@/lib/utils'
 import type { ChatOutcome } from '../types/ai-chat.types'
+import { diffChars, type DiffSegment } from '../utils/diff-text'
 
 /** Per-kind label + accent. Tones are deliberately distinct so partial success
  *  (something happened) never reads like scope/conflict (nothing happened). */
@@ -103,20 +104,7 @@ function OutcomeBody({ outcome }: { outcome: ChatOutcome }) {
             . Nothing was applied — review the change and try again.
           </p>
           {outcome.expectedText !== undefined && outcome.actualText !== undefined && (
-            <dl className="space-y-1.5 text-[12.5px]">
-              <div className="rounded-sm bg-muted/60 px-2.5 py-1.5">
-                <dt className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                  Expected
-                </dt>
-                <dd className="mt-0.5 text-foreground">{outcome.expectedText}</dd>
-              </div>
-              <div className="rounded-sm bg-muted/60 px-2.5 py-1.5">
-                <dt className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                  Found
-                </dt>
-                <dd className="mt-0.5 text-foreground">{outcome.actualText}</dd>
-              </div>
-            </dl>
+            <ConflictDiff expected={outcome.expectedText} actual={outcome.actualText} />
           )}
         </div>
       )
@@ -149,4 +137,57 @@ function OutcomeBody({ outcome }: { outcome: ChatOutcome }) {
         </p>
       )
   }
+}
+
+/** The Expected/Found diff for a content-existence conflict. Shared text is muted;
+ *  the diverging run is highlighted — coral for what the assistant expected but
+ *  didn't find, moss for what's actually there instead — so the delta is visible
+ *  at a glance rather than something to eyeball character by character. */
+function ConflictDiff({ expected, actual }: { expected: string; actual: string }) {
+  const diff = diffChars(expected, actual)
+  return (
+    <dl className="space-y-1.5 text-[12.5px]">
+      <DiffRow
+        label="Expected"
+        segments={diff.expected}
+        changedClass="bg-presence-coral/20 text-presence-coral"
+      />
+      <DiffRow
+        label="Found"
+        segments={diff.actual}
+        changedClass="bg-presence-moss/20 text-presence-moss"
+      />
+    </dl>
+  )
+}
+
+function DiffRow({
+  label,
+  segments,
+  changedClass,
+}: {
+  label: string
+  segments: DiffSegment[]
+  changedClass: string
+}) {
+  return (
+    <div className="rounded-sm bg-muted/60 px-2.5 py-1.5">
+      <dt className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+        {label}
+      </dt>
+      <dd className="mt-0.5 whitespace-pre-wrap wrap-break-word text-muted-foreground">
+        {segments.map((seg, i) =>
+          seg.changed ? (
+            <span key={i} className={cn('rounded-[2px]', changedClass)}>
+              {seg.text}
+            </span>
+          ) : (
+            <span key={i} className="text-foreground">
+              {seg.text}
+            </span>
+          ),
+        )}
+      </dd>
+    </div>
+  )
 }
