@@ -18,8 +18,13 @@ export function ConnectionStatusIndicator() {
   const { status } = useCollaboration()
   const c = config[status]
   return (
-    <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+    <div
+      role="status"
+      aria-live="polite"
+      className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground"
+    >
       <span
+        aria-hidden="true"
         className={cn('size-1.5 rounded-full', c.pulse && 'motion-safe:animate-pulse')}
         style={{ backgroundColor: c.color }}
       />

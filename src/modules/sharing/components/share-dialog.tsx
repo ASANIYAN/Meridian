@@ -56,7 +56,7 @@ export function ShareDialog({ documentId }: { documentId: string }) {
           ))}
         </div>
 
-        <div className="max-h-[60vh] overflow-y-auto pt-1">
+        <div className="max-h-[60vh] overflow-y-auto overscroll-contain pt-1">
           {tab === 'members' ? (
             <MembersPanel documentId={documentId} active={open && tab === 'members'} />
           ) : (

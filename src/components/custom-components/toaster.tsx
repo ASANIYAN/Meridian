@@ -45,6 +45,7 @@ export function Toaster() {
               stroke="currentColor"
               strokeWidth={2}
               className="size-3.5"
+              aria-hidden="true"
             >
               <line x1="6" y1="6" x2="18" y2="18" />
               <line x1="6" y1="18" x2="18" y2="6" />

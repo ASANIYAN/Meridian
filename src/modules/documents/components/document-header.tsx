@@ -37,7 +37,7 @@ export function DocumentHeader({ documentId }: { documentId: string }) {
         ← Back to documents
       </Link>
 
-      <div className="mt-4 flex items-start justify-between gap-4">
+      <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <div className="min-w-0 flex-1">
           {data ? (
             <InlineDocumentTitle documentId={documentId} title={data.title} canEdit={canEdit} />
@@ -52,7 +52,7 @@ export function DocumentHeader({ documentId }: { documentId: string }) {
         </div>
 
         {data && isAuthor && (
-          <div className="flex shrink-0 items-center gap-2">
+          <div className="flex shrink-0 flex-wrap items-center gap-2">
             <ShareDialog documentId={documentId} />
             <DocumentStatusToggle documentId={documentId} status={data.status} />
             <DeleteDocumentDialog documentId={documentId} title={data.title} />

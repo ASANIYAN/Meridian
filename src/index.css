@@ -29,6 +29,10 @@
 
   --radius: 0.5rem;
 
+  /* Light register by default — tells the browser to render native controls
+     (scrollbars, select popups, form widgets) light-side (FE-POLISH-1). */
+  color-scheme: light;
+
   /* Semantic — light register (the app / chart table) */
   --background: var(--vellum);
   --foreground: var(--ink);
@@ -48,6 +52,9 @@
 
 /* Semantic — dark register (auth / the chart) */
 .chart {
+  /* Match native controls to the dark surface. */
+  color-scheme: dark;
+
   --background: var(--ink);
   --foreground: var(--vellum);
   --card: var(--graphite);
@@ -116,6 +123,22 @@
     background-color: var(--background);
     color: var(--foreground);
     font-family: var(--font-sans);
+  }
+  /* Snappier touch: drop the 300ms double-tap delay and the grey tap flash on
+     interactive controls (FE-POLISH-1). */
+  button,
+  a,
+  label,
+  select,
+  summary,
+  [role='button'] {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  /* Balance multi-line display headings so they don't leave orphan words. */
+  h1,
+  h2 {
+    text-wrap: balance;
   }
 }
 
