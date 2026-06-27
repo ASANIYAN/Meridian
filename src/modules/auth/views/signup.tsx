@@ -13,7 +13,13 @@ export function SignupView() {
   const rootError = form.formState.errors.root?.message
 
   return (
-    <AuthLayout lede={<>Start where your <em className="italic text-brass-soft">drafts</em> converge.</>}>
+    <AuthLayout
+      lede={
+        <>
+          Start where your <em className="italic text-brass-soft">drafts</em> converge.
+        </>
+      }
+    >
       <AuthPlate onSubmit={onSubmit}>
         {submitted ? (
           <AuthNotice
@@ -23,8 +29,8 @@ export function SignupView() {
             heading="Confirm your email"
             description={
               <>
-                We sent a confirmation link to <span className="text-foreground">{email}</span>. Open
-                it to start writing.
+                We sent a confirmation link to <span className="text-foreground">{email}</span>.
+                Open it to start writing.
               </>
             }
             footer={<MonoLink to="/login">Back to sign in</MonoLink>}

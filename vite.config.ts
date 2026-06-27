@@ -30,7 +30,11 @@ export default defineConfig({
         // chunk stays lean (the document/editor route is lazy-loaded separately).
         manualChunks(id) {
           if (!id.includes('node_modules')) return
-          if (/[\\/]node_modules[\\/](react|react-dom|react-router|react-router-dom|scheduler)[\\/]/.test(id))
+          if (
+            /[\\/]node_modules[\\/](react|react-dom|react-router|react-router-dom|scheduler)[\\/]/.test(
+              id,
+            )
+          )
             return 'react'
           if (id.includes('@tanstack')) return 'query'
           if (

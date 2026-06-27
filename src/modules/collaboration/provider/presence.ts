@@ -43,10 +43,7 @@ export function parsePresenceFrame(frame: unknown): PresenceUpdate | null {
 }
 
 /** Apply a presence update to the current roster (add on online, remove on offline). */
-export function applyPresenceUpdate(
-  roster: PresentUser[],
-  update: PresenceUpdate,
-): PresentUser[] {
+export function applyPresenceUpdate(roster: PresentUser[], update: PresenceUpdate): PresentUser[] {
   if (update.status === 'offline') {
     return roster.filter((u) => u.userId !== update.user.userId)
   }

@@ -9,7 +9,10 @@ describe('getApiErrorMessage', () => {
       response: {
         data: {
           statusCode: 400,
-          message: ['email must be an email', 'password must be longer than or equal to 8 characters'],
+          message: [
+            'email must be an email',
+            'password must be longer than or equal to 8 characters',
+          ],
           error: 'Bad Request',
         },
       },
@@ -44,7 +47,10 @@ describe('extractFieldErrors', () => {
     const error = {
       response: {
         data: {
-          message: ['email must be an email', 'password must be longer than or equal to 8 characters'],
+          message: [
+            'email must be an email',
+            'password must be longer than or equal to 8 characters',
+          ],
         },
       },
     }

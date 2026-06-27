@@ -7,7 +7,11 @@ export function ForgotPasswordView() {
     <EmailRequestView
       hook={hook}
       title="Reset password"
-      lede={<>Find your way <em className="italic text-brass-soft">back</em>.</>}
+      lede={
+        <>
+          Find your way <em className="italic text-brass-soft">back</em>.
+        </>
+      }
       submitLabel="Send reset link"
       description="Enter your email and we'll send a link to set a new password."
       sent={{

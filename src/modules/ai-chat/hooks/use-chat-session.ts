@@ -15,9 +15,7 @@ export function useChatSession(documentId: string) {
   const [turns, setTurns] = useState<ChatTurn[]>([])
 
   const resolveTurn = useCallback((turnId: string, outcome: ChatOutcome) => {
-    setTurns((prev) =>
-      prev.map((t) => (t.id === turnId ? { ...t, status: 'done', outcome } : t)),
-    )
+    setTurns((prev) => prev.map((t) => (t.id === turnId ? { ...t, status: 'done', outcome } : t)))
   }, [])
 
   const mutation = useMutation({

@@ -20,7 +20,13 @@ export function VerifyPendingView() {
   }
 
   return (
-    <AuthLayout lede={<>Almost there — one link to <em className="italic text-brass-soft">converge</em>.</>}>
+    <AuthLayout
+      lede={
+        <>
+          Almost there — one link to <em className="italic text-brass-soft">converge</em>.
+        </>
+      }
+    >
       <AuthPlate>
         <AuthNotice
           tone="sent"

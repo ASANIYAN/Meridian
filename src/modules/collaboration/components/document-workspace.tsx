@@ -43,8 +43,8 @@ export function DocumentWorkspace() {
   return (
     <div className="mx-auto max-w-[68ch]">
       <div className="mb-4 rounded-md border border-dashed border-border bg-muted/40 px-4 py-3 text-[13px] leading-relaxed text-muted-foreground">
-        Provider connected. This is a temporary sync check — type here and watch it mirror in another
-        tab. The Tiptap editor lands next.
+        Provider connected. This is a temporary sync check — type here and watch it mirror in
+        another tab. The Tiptap editor lands next.
       </div>
       <textarea
         value={value}
