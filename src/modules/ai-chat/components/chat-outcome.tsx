@@ -105,13 +105,13 @@ function OutcomeBody({ outcome }: { outcome: ChatOutcome }) {
           {outcome.expectedText !== undefined && outcome.actualText !== undefined && (
             <dl className="space-y-1.5 text-[12.5px]">
               <div className="rounded-sm bg-muted/60 px-2.5 py-1.5">
-                <dt className="font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
+                <dt className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
                   Expected
                 </dt>
                 <dd className="mt-0.5 text-foreground">{outcome.expectedText}</dd>
               </div>
               <div className="rounded-sm bg-muted/60 px-2.5 py-1.5">
-                <dt className="font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
+                <dt className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
                   Found
                 </dt>
                 <dd className="mt-0.5 text-foreground">{outcome.actualText}</dd>

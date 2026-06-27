@@ -61,7 +61,7 @@ export function ChatSidebar() {
             role="dialog"
             aria-modal="true"
             aria-label="AI assistant"
-            className="fixed inset-y-0 right-0 z-50 flex w-full max-w-[400px] flex-col border-l border-border bg-background shadow-[-24px_0_60px_-30px_rgba(15,26,42,0.45)] motion-safe:animate-[slide-in-right_180ms_ease-out]"
+            className="fixed inset-y-0 right-0 z-50 flex w-full max-w-100 flex-col border-l border-border bg-background shadow-[-24px_0_60px_-30px_rgba(15,26,42,0.45)] motion-safe:animate-[slide-in-right_180ms_ease-out]"
           >
             <header className="flex items-center justify-between border-b border-border px-4 py-3">
               <div>
