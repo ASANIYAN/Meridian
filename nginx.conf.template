@@ -1,0 +1,49 @@
+# nginx config for the production SPA (FE-SETUP-7).
+#
+# Placed in /etc/nginx/templates so the official nginx image runs envsubst on it
+# at container start. Only ${API_UPSTREAM} is substituted (NGINX_ENVSUBST_FILTER
+# pins it), so nginx's own runtime vars like $host / $uri are left untouched.
+
+server {
+    listen      80;
+    server_name _;
+
+    root  /usr/share/nginx/html;
+    index index.html;
+
+    # Don't let proxy errors or missing assets surface nginx's default pages.
+    server_tokens off;
+
+    # Hashed build assets are content-addressed and immutable — cache hard.
+    location /assets/ {
+        expires    1y;
+        add_header Cache-Control "public, immutable";
+        try_files  $uri =404;
+    }
+
+    # Same-origin REST proxy (CLAUDE.md §2) — mirrors the Vite dev proxy so the
+    # SPA calls /v1/* without CORS. The API serves under its own /v1 prefix, so
+    # the full request URI is forwarded unchanged to ${API_UPSTREAM}.
+    #
+    # The upstream is passed through a variable on purpose: a literal proxy_pass
+    # host is resolved at startup, so nginx would crash-loop if the API isn't up
+    # yet. Using a variable defers DNS to request time via the resolver (the
+    # container's own nameserver, ${NGINX_LOCAL_RESOLVERS}, set by the nginx
+    # image at boot) — so the SPA still serves even while the API is starting.
+    location /v1 {
+        resolver           ${NGINX_LOCAL_RESOLVERS} valid=10s ipv6=off;
+        set                $meridian_api ${API_UPSTREAM};
+        proxy_pass         $meridian_api$request_uri;
+        proxy_http_version 1.1;
+        proxy_set_header   Host              $host;
+        proxy_set_header   X-Real-IP         $remote_addr;
+        proxy_set_header   X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto $scheme;
+    }
+
+    # SPA history fallback — every other path serves index.html so client-side
+    # routes (e.g. /documents/:id, /join/:id) resolve on a hard refresh.
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
