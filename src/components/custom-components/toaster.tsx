@@ -26,7 +26,7 @@ export function Toaster() {
         <div
           key={toast.id}
           role="status"
-          className="toast-in pointer-events-auto flex items-start gap-3 rounded-md border border-border bg-card p-3.5 shadow-[0_16px_40px_-20px_rgba(15,26,42,0.4)]"
+          className="toast pointer-events-auto flex items-start gap-3 rounded-md border border-border bg-card p-3.5 shadow-[0_16px_40px_-20px_rgba(15,26,42,0.4)]"
         >
           <span
             className="mt-1.5 size-1.5 shrink-0 rounded-full"
