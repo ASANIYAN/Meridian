@@ -1,6 +1,10 @@
 import { useCollaboration } from '../hooks/use-collaboration'
 import { DocumentEditor } from './document-editor'
 
+interface DocumentWorkspaceProps {
+  title?: string
+}
+
 /**
  * The editing surface for the open document. Gates on `ready` so the Tiptap
  * editor only mounts once the connection has hydrated the Y.Doc from
@@ -8,7 +12,7 @@ import { DocumentEditor } from './document-editor'
  * It reads the live doc and role from the route-scoped Context via the light
  * `useCollaboration` hook; it owns no connection state itself.
  */
-export function DocumentWorkspace() {
+export function DocumentWorkspace({ title }: DocumentWorkspaceProps) {
   const { doc, ready, role } = useCollaboration()
 
   if (!ready) {
@@ -21,5 +25,5 @@ export function DocumentWorkspace() {
     )
   }
 
-  return <DocumentEditor doc={doc} editable={role !== 'viewer'} />
+  return <DocumentEditor doc={doc} title={title} editable={role !== 'viewer'} />
 }

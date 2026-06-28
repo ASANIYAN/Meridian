@@ -42,7 +42,7 @@ apiClient.interceptors.response.use(
     if (error?.response?.status === 401) {
       useAuthStore.getState().clearSession()
       if (window.location.pathname !== '/login') {
-        window.location.assign('/login')
+        window.location.assign('/login?session=expired')
       }
     }
     return Promise.reject(error)

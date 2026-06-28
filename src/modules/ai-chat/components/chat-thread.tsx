@@ -2,9 +2,15 @@ import { useEffect, useRef } from 'react'
 import type { ChatTurn } from '../types/ai-chat.types'
 import { ChatOutcomeCard } from './chat-outcome'
 
+interface ChatThreadProps {
+  turns: ChatTurn[]
+  onAccept: (turnId: string, proposalId: string, confirm?: boolean) => void
+  onDecline: (turnId: string, proposalId: string) => void
+}
+
 /** The scrollable message thread (FE-CHAT-2). Each turn is the author's prompt
  *  followed by a pending indicator or the resolved outcome card. */
-export function ChatThread({ turns }: { turns: ChatTurn[] }) {
+export function ChatThread({ turns, onAccept, onDecline }: ChatThreadProps) {
   const endRef = useRef<HTMLDivElement>(null)
 
   // Keep the latest turn in view as the thread grows.
@@ -16,8 +22,8 @@ export function ChatThread({ turns }: { turns: ChatTurn[] }) {
     return (
       <div className="flex flex-1 items-center justify-center px-6 text-center">
         <p className="max-w-[30ch] text-[13px] leading-relaxed text-muted-foreground">
-          Ask the assistant to draft, revise, or restructure the document. Edits appear live in the
-          editor.
+          Ask the assistant to draft, revise, or restructure the document. Review each edit before
+          applying it.
         </p>
       </div>
     )
@@ -41,7 +47,14 @@ export function ChatThread({ turns }: { turns: ChatTurn[] }) {
               Thinking…
             </p>
           ) : (
-            turn.outcome && <ChatOutcomeCard outcome={turn.outcome} />
+            turn.outcome && (
+              <ChatOutcomeCard
+                outcome={turn.outcome}
+                action={turn.action}
+                onAccept={(proposalId, confirm) => onAccept(turn.id, proposalId, confirm)}
+                onDecline={(proposalId) => onDecline(turn.id, proposalId)}
+              />
+            )
           )}
         </div>
       ))}

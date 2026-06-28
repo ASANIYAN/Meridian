@@ -71,7 +71,7 @@ export function EditorToolbar({ editor }: { editor: Editor }) {
         active={state.highlight}
         onClick={() => editor.chain().focus().toggleHighlight().run()}
       >
-        <span className="rounded-[2px] bg-brass/35 px-1 text-[12px] font-semibold leading-none text-foreground">
+        <span className="border-b-3 border-brass/65 px-0.5 text-[12px] font-semibold leading-none text-foreground">
           A
         </span>
       </ToolbarButton>

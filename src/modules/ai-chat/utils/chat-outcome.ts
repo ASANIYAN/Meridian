@@ -1,6 +1,6 @@
 import { getApiErrorMessage, getApiErrorStatus, isApiError } from '@/lib/api/get-api-error-message'
-import type { ChatSuccess } from '../api/ai-chat-api'
-import type { ChatOutcome } from '../types/ai-chat.types'
+import type { ChatProposal, ChatSuccess } from '../api/ai-chat-api'
+import type { AiEditDiff, ChatOutcome } from '../types/ai-chat.types'
 
 /** A `200` body → full success, or partial if any operation was skipped. */
 export function toSuccessOutcome(data: ChatSuccess): ChatOutcome {
@@ -12,6 +12,23 @@ export function toSuccessOutcome(data: ChatSuccess): ChatOutcome {
     }
   }
   return { kind: 'applied', operationsApplied: data.operations_applied }
+}
+
+export function toProposalOutcome(data: ChatProposal): ChatOutcome {
+  return {
+    kind: 'proposal',
+    proposalId: data.proposalId,
+    diff: data.diff,
+    expiresAt: data.expiresAt,
+  }
+}
+
+function readDiff(value: unknown): AiEditDiff | undefined {
+  if (typeof value !== 'object' || value === null) return undefined
+  const diff = value as Record<string, unknown>
+  return typeof diff.before === 'string' && typeof diff.after === 'string'
+    ? { before: diff.before, after: diff.after }
+    : undefined
 }
 
 /**
@@ -43,9 +60,31 @@ export function toErrorOutcome(error: unknown): ChatOutcome {
       return { kind: 'scope', message }
     case 400:
       return { kind: 'format', message }
+    case 410:
+      return { kind: 'gone', message }
     case 429:
       return { kind: 'rate-limited', message }
     default:
       return { kind: 'error', message }
+  }
+}
+
+export function toProposalAcceptErrorOutcome(error: unknown, proposalId: string): ChatOutcome {
+  const status = getApiErrorStatus(error)
+  if (status !== 409) return toErrorOutcome(error)
+
+  const message = getApiErrorMessage(error)
+  const body = isApiError(error)
+    ? (error.response?.data as Record<string, unknown> | undefined)
+    : undefined
+
+  return {
+    kind: 'proposal-conflict',
+    proposalId,
+    message,
+    diff: readDiff(body?.diff),
+    operationIndex: typeof body?.operation_index === 'number' ? body.operation_index : undefined,
+    expectedText: typeof body?.expected_text === 'string' ? body.expected_text : undefined,
+    actualText: typeof body?.actual_text === 'string' ? body.actual_text : undefined,
   }
 }

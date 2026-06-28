@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
@@ -58,6 +59,12 @@ export function useLogin() {
     mode: 'onBlur',
     defaultValues: { email: '', password: '' },
   })
+
+  useEffect(() => {
+    if (searchParams.get('session') === 'expired') {
+      form.setError('root', { message: 'Your session expired. Sign in to continue.' })
+    }
+  }, [form, searchParams])
 
   const mutation = useMutation({
     mutationFn: login,

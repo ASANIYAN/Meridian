@@ -54,7 +54,7 @@ export function useDocumentConnection(documentId: string, role?: Role): Collabor
         }),
       onTerminalClose: (action) => {
         addToast({ message: action.message, variant: 'error' })
-        if (action.kind === 'redirect-login') navigate('/login', { replace: true })
+        if (action.kind === 'redirect-login') navigate('/login?session=expired', { replace: true })
         else if (action.kind === 'redirect-documents') navigate('/documents', { replace: true })
       },
     })
