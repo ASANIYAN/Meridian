@@ -6,7 +6,8 @@ import { useAuthStore } from '@/store/auth-store'
 import { useSignOut } from '@/modules/auth/hooks/use-sign-out'
 import { fullName } from '@/types/user'
 import type { DocumentSummary } from '@/types/document'
-import { documentsKey } from '@/modules/documents/hooks/use-documents'
+import { documentKey, documentsKey } from '@/modules/documents/hooks/use-documents'
+import { useDocument } from '@/modules/documents/hooks/use-document'
 import { DocumentHeader } from '@/modules/documents/components/document-header'
 import { ChatSidebar } from '@/modules/ai-chat/components/chat-sidebar'
 import { useDocumentConnection } from '../hooks/use-document-connection'
@@ -27,11 +28,20 @@ export function DocumentRoute() {
   const user = useAuthStore((s) => s.user)
   const signOut = useSignOut()
 
-  // Role from the documents cache when we have it; deep-links may not (the
-  // backend still enforces access regardless).
+  const { data: document } = useDocument(id)
+
+  // Role from the list cache first, with the detail query as the refresh/deep-link
+  // fallback. The backend still enforces access regardless.
   const role = useMemo(() => {
     const docs = queryClient.getQueryData<DocumentSummary[]>(documentsKey)
-    return docs?.find((d) => d.id === id)?.role
+    return docs?.find((d) => d.id === id)?.role ?? document?.role
+  }, [queryClient, id, document?.role])
+  const cachedTitle = useMemo(() => {
+    const docs = queryClient.getQueryData<DocumentSummary[]>(documentsKey)
+    return (
+      queryClient.getQueryData<DocumentSummary>(documentKey(id))?.title ??
+      docs?.find((d) => d.id === id)?.title
+    )
   }, [queryClient, id])
 
   const connection = useDocumentConnection(id, role)
@@ -53,7 +63,7 @@ export function DocumentRoute() {
         </div>
         {/* The editor owns the rest of the viewport: a full-bleed canvas that the
             page sheet floats on (Google-Docs structure). */}
-        <DocumentWorkspace />
+        <DocumentWorkspace title={document?.title ?? cachedTitle} />
       </AppShell>
       <ChatSidebar />
     </CollaborationContext.Provider>

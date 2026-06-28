@@ -4,19 +4,32 @@ export interface RejectedOperation {
   reason: string
 }
 
+/** The before/after text preview returned by staged AI edit endpoints. */
+export interface AiEditDiff {
+  before: string
+  after: string
+}
+
 /**
  * The result of one AI instruction, as the chat UI needs to render it (FE-CHAT-3).
  *
- * Five outcomes per CLAUDE.md §9, confirmed against backend PR #48: two `200`
- * success shapes (full / partial) plus three error variants keyed off HTTP
- * status — 409 content-existence (carries `operation_index`/`expected_text`/
- * `actual_text`, forwarded intact by the GlobalExceptionFilter), 422 scope, and
- * 400 format. `rate-limited` (429) and `error` (anything uncategorized, e.g. a
- * 500 or a network failure) are non-fatal catch-alls.
+ * Includes staged proposal states, accept/decline results, and the non-fatal
+ * error outcomes the chat surface can recover from inline.
  */
 export type ChatOutcome =
+  | { kind: 'proposal'; proposalId: string; diff: AiEditDiff; expiresAt: string }
+  | { kind: 'declined'; message: string }
   | { kind: 'applied'; operationsApplied: number }
   | { kind: 'partial'; operationsApplied: number; rejected: RejectedOperation[] }
+  | {
+      kind: 'proposal-conflict'
+      proposalId: string
+      message: string
+      diff?: AiEditDiff
+      operationIndex?: number
+      expectedText?: string
+      actualText?: string
+    }
   | {
       kind: 'content-conflict'
       message: string
@@ -26,6 +39,7 @@ export type ChatOutcome =
     }
   | { kind: 'scope'; message: string }
   | { kind: 'format'; message: string }
+  | { kind: 'gone'; message: string }
   | { kind: 'rate-limited'; message: string }
   | { kind: 'error'; message: string }
 
@@ -37,4 +51,5 @@ export interface ChatTurn {
   status: 'pending' | 'done'
   /** Set once the request settles — success or failure. */
   outcome?: ChatOutcome
+  action?: 'accepting' | 'declining'
 }

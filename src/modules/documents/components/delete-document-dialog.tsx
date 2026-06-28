@@ -29,7 +29,11 @@ export function DeleteDocumentDialog({ documentId, title }: DeleteDocumentDialog
       confirmLabel="Delete document"
       pendingLabel="Deleting…"
       onConfirm={() => remove.mutateAsync()}
-      trigger={<Button variant="danger-outline">Delete</Button>}
+      trigger={
+        <Button variant="danger-outline" size="sm">
+          Delete
+        </Button>
+      }
     />
   )
 }

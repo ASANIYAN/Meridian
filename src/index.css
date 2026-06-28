@@ -147,12 +147,10 @@
    .meridian-editor so it never leaks into the rest of the app. No typography
    plugin; these are the document's own prose rules. */
 .meridian-editor {
-  min-height: clamp(28rem, 68vh, 60rem);
-  /* Capped measure inside a wide sheet: side padding absorbs the leftover space
-     beyond ~72ch and centers the text, while the editable element still fills the
-     whole sheet so clicking anywhere focuses it. Floors at 1.5rem on phones,
-     caps so the column stays centered on very wide sheets. */
-  padding: 3.5rem clamp(1.5rem, calc((100% - 72ch) / 2), 12rem);
+  width: 100%;
+  max-width: 72ch;
+  min-height: clamp(26rem, 62vh, 58rem);
+  margin: 0 auto;
   font-family: var(--font-sans);
   font-size: 16px;
   line-height: 1.75;
@@ -321,7 +319,7 @@
 @keyframes dialog-in {
   from {
     opacity: 0;
-    transform: translateY(6px) scale(0.96);
+    transform: translateY(4px) scale(0.985);
   }
   to {
     opacity: 1;
@@ -331,22 +329,22 @@
 @keyframes dialog-out {
   to {
     opacity: 0;
-    transform: translateY(4px) scale(0.97);
+    transform: translateY(2px) scale(0.99);
   }
 }
 .dialog-overlay[data-state='open'] {
-  animation: overlay-in 150ms ease-out;
+  animation: overlay-in 100ms ease-out;
 }
 .dialog-overlay[data-state='closed'] {
-  animation: overlay-out 120ms ease-out;
+  animation: overlay-out 90ms ease-out;
 }
 .dialog-content[data-state='open'] {
-  animation: dialog-in 180ms ease-out;
+  animation: dialog-in 120ms ease-out;
 }
 /* Exit is snappier than the entrance (asymmetric timing — fast where the system
    is responding). Radix keeps the node mounted until this animation ends. */
 .dialog-content[data-state='closed'] {
-  animation: dialog-out 120ms ease-out;
+  animation: dialog-out 90ms ease-out;
 }
 /* Right-edge slide-over (AI assistant sidebar, FE-CHAT-1). */
 @keyframes slide-in-right {

@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { toErrorOutcome, toSuccessOutcome } from './chat-outcome'
+import {
+  toErrorOutcome,
+  toProposalAcceptErrorOutcome,
+  toProposalOutcome,
+  toSuccessOutcome,
+} from './chat-outcome'
 
 /** A minimal axios-style error carrying a parsed response body. */
 function apiError(status: number, data: Record<string, unknown>) {
@@ -29,6 +34,23 @@ describe('toSuccessOutcome', () => {
       kind: 'partial',
       operationsApplied: 1,
       rejected: [{ index: 2, reason: 'no matching text' }],
+    })
+  })
+})
+
+describe('toProposalOutcome', () => {
+  it('maps a staged proposal into a review outcome', () => {
+    expect(
+      toProposalOutcome({
+        proposalId: 'proposal-1',
+        diff: { before: 'old', after: 'new' },
+        expiresAt: '2026-06-27T12:15:00.000Z',
+      }),
+    ).toEqual({
+      kind: 'proposal',
+      proposalId: 'proposal-1',
+      diff: { before: 'old', after: 'new' },
+      expiresAt: '2026-06-27T12:15:00.000Z',
     })
   })
 })
@@ -76,6 +98,14 @@ describe('toErrorOutcome', () => {
     expect(toErrorOutcome(apiError(429, {})).kind).toBe('rate-limited')
   })
 
+  it('410; gone, surfacing the backend message', () => {
+    expect(
+      toErrorOutcome(
+        apiError(410, { message: 'This proposal no longer exists; ask the AI again' }),
+      ),
+    ).toEqual({ kind: 'gone', message: 'This proposal no longer exists; ask the AI again' })
+  })
+
   it('an uncategorized 500 falls through to a plain error', () => {
     const outcome = toErrorOutcome(apiError(500, { message: 'Internal server error' }))
     expect(outcome).toEqual({ kind: 'error', message: 'Internal server error' })
@@ -83,5 +113,37 @@ describe('toErrorOutcome', () => {
 
   it('a non-API error (e.g. network failure) is a plain error', () => {
     expect(toErrorOutcome(new Error('Network Error')).kind).toBe('error')
+  })
+})
+
+describe('toProposalAcceptErrorOutcome', () => {
+  it('409; keeps the proposal id and updated diff for confirm retry', () => {
+    expect(
+      toProposalAcceptErrorOutcome(
+        apiError(409, {
+          message: 'Document has changed since this proposal was generated',
+          diff: { before: 'current', after: 'updated' },
+          operation_index: 0,
+          expected_text: 'old',
+          actual_text: 'current',
+        }),
+        'proposal-1',
+      ),
+    ).toEqual({
+      kind: 'proposal-conflict',
+      proposalId: 'proposal-1',
+      message: 'Document has changed since this proposal was generated',
+      diff: { before: 'current', after: 'updated' },
+      operationIndex: 0,
+      expectedText: 'old',
+      actualText: 'current',
+    })
+  })
+
+  it('non-409 accept failures reuse the normal chat error mapping', () => {
+    expect(toProposalAcceptErrorOutcome(apiError(410, { message: 'Gone' }), 'proposal-1')).toEqual({
+      kind: 'gone',
+      message: 'Gone',
+    })
   })
 })

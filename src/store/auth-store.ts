@@ -1,6 +1,7 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { createJSONStorage, persist } from 'zustand/middleware'
 import type { User } from '@/types/user'
+import { authCookieStorage } from './auth-cookie-storage'
 
 interface AuthState {
   user: User | null
@@ -9,6 +10,11 @@ interface AuthState {
   setSession: (session: { user: User; token: string }) => void
   clearSession: () => void
 }
+
+type AuthBroadcast = { type: 'session'; user: User; token: string } | { type: 'clear' }
+
+const authChannel =
+  typeof BroadcastChannel === 'undefined' ? null : new BroadcastChannel('meridian-auth')
 
 /**
  * Session/auth — the one legitimate general-purpose Zustand store (CLAUDE.md §3).
@@ -19,13 +25,36 @@ interface AuthState {
  */
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
-      user: null,
-      token: null,
-      isVerified: false,
-      setSession: ({ user, token }) => set({ user, token, isVerified: user.verifiedAt !== null }),
-      clearSession: () => set({ user: null, token: null, isVerified: false }),
-    }),
-    { name: 'meridian-auth' },
+    (set) => {
+      authChannel?.addEventListener('message', (event: MessageEvent<AuthBroadcast>) => {
+        if (event.data.type === 'session') {
+          set({
+            user: event.data.user,
+            token: event.data.token,
+            isVerified: event.data.user.verifiedAt !== null,
+          })
+        } else {
+          set({ user: null, token: null, isVerified: false })
+        }
+      })
+
+      return {
+        user: null,
+        token: null,
+        isVerified: false,
+        setSession: ({ user, token }) => {
+          set({ user, token, isVerified: user.verifiedAt !== null })
+          authChannel?.postMessage({ type: 'session', user, token } satisfies AuthBroadcast)
+        },
+        clearSession: () => {
+          set({ user: null, token: null, isVerified: false })
+          authChannel?.postMessage({ type: 'clear' } satisfies AuthBroadcast)
+        },
+      }
+    },
+    {
+      name: 'meridian-auth',
+      storage: createJSONStorage(() => authCookieStorage),
+    },
   ),
 )

@@ -114,8 +114,12 @@ export function ChatSidebar() {
               </button>
             </header>
 
-            <ChatThread turns={session.turns} />
-            <ChatComposer onSend={session.send} disabled={session.isSending} />
+            <ChatThread
+              turns={session.turns}
+              onAccept={session.accept}
+              onDecline={session.decline}
+            />
+            <ChatComposer onSend={session.send} disabled={session.isSending || session.isActing} />
           </aside>
         </>
       )}
