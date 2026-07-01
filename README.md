@@ -30,7 +30,11 @@ Validated at startup (`src/config/env.ts`) and must be a valid URL:
 | -------------- | --------------------------------------------------------- | ----------------------- |
 | `VITE_API_URL` | REST API origin (the `/v1` prefix is added by the client) | `http://localhost:8000` |
 
-In development the Vite dev server proxies `/v1` to `VITE_API_URL`; in production nginx does the same (see [Dockerfile](Dockerfile) / [nginx.conf.template](nginx.conf.template)).
+The REST client calls `VITE_API_URL` directly, in every environment — there's
+no dev proxy or nginx proxy in front of it (see [Dockerfile](Dockerfile) /
+[nginx.conf](nginx.conf)), since a same-origin relative path only works behind
+something that proxies it, and static hosts like Vercel have no such layer.
+**The backend must allow the app's origin via CORS.**
 
 The WS gateway rides this same origin — no separate port or env var. The
 collaboration provider derives its WS URL from `VITE_API_URL` (`http` →
@@ -63,7 +67,7 @@ npm run test:e2e
 
 ```bash
 docker build -t meridian-frontend --build-arg VITE_API_URL=https://your-api .
-docker run -p 8080:80 -e API_UPSTREAM=http://your-api:8000 meridian-frontend
+docker run -p 8080:80 meridian-frontend
 ```
 
-Multi-stage build (Node → nginx); nginx serves the SPA with history fallback and same-origin-proxies `/v1` to `API_UPSTREAM`.
+Multi-stage build (Node → nginx); nginx serves the SPA as static files with history fallback — no REST proxying, since the app calls `VITE_API_URL` directly.

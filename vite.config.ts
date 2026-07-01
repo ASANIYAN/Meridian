@@ -1,12 +1,8 @@
 /// <reference types="vitest/config" />
-import { defineConfig, loadEnv } from 'vite'
+import { defineConfig } from 'vite'
 import { fileURLToPath, URL } from 'node:url'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
-
-// Dev proxy target — the REST API origin (default port 8000, CLAUDE.md §2).
-const env = loadEnv(process.env.NODE_ENV ?? 'development', process.cwd(), 'VITE_')
-const apiTarget = env.VITE_API_URL || 'http://localhost:8000'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -16,13 +12,10 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
-  server: {
-    // Proxy /v1 to the API so requests are same-origin and never hit CORS.
-    // In production the same path is served behind nginx (FE-SETUP-7).
-    proxy: {
-      '/v1': { target: apiTarget, changeOrigin: true },
-    },
-  },
+  // No dev proxy: apiClient calls VITE_API_URL directly (src/lib/api/client.ts)
+  // so the app behaves the same in dev, Docker, and static hosts like Vercel
+  // that have no proxy layer of their own. Requires the backend to allow the
+  // dev origin via CORS.
   build: {
     rollupOptions: {
       output: {
