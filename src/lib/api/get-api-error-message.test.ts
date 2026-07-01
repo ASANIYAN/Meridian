@@ -34,6 +34,22 @@ describe('getApiErrorMessage', () => {
     expect(getApiErrorMessage(new Error('Network Error'))).toBe('Network Error')
   })
 
+  it('does not leak the raw axios message when no HTTP response was reached', () => {
+    const timeout = {
+      isAxiosError: true,
+      code: 'ECONNABORTED',
+      message: 'timeout of 15000ms exceeded',
+    }
+    expect(getApiErrorMessage(timeout)).toBe(
+      'Unable to reach the server. Please check your connection and try again.',
+    )
+
+    const networkError = { isAxiosError: true, message: 'Network Error' }
+    expect(getApiErrorMessage(networkError)).toBe(
+      'Unable to reach the server. Please check your connection and try again.',
+    )
+  })
+
   it('uses the hardcoded fallback for a malformed/empty response', () => {
     expect(getApiErrorMessage({ response: { data: {} } })).toBe(FALLBACK)
     expect(getApiErrorMessage(null)).toBe(FALLBACK)
