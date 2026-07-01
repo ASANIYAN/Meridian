@@ -13,9 +13,8 @@ export default defineConfig({
     },
   },
   // No dev proxy: apiClient calls VITE_API_URL directly (src/lib/api/client.ts)
-  // so the app behaves the same in dev, Docker, and static hosts like Vercel
-  // that have no proxy layer of their own. Requires the backend to allow the
-  // dev origin via CORS.
+  // so the app behaves the same in dev and in production (Vercel). Requires
+  // the backend to allow the dev origin via CORS.
   build: {
     rollupOptions: {
       output: {

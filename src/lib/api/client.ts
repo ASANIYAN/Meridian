@@ -17,12 +17,10 @@ export function unwrap<T>(response: AxiosResponse<ApiEnvelope<T>>): T {
 
 /**
  * Base client. The /v1 prefix lives here, not in each hook (CLAUDE.md §2). The
- * base is the *absolute* API origin (VITE_API_URL) — a same-origin relative
- * `/v1` only works behind something that proxies it to the API (the Vite dev
- * proxy, or nginx in the Docker deployment target), and static hosts like
- * Vercel have no such proxy, so a relative path 404s there with no fallback.
- * Calling the API directly means the backend must allow the app's origin(s)
- * via CORS — there's no same-origin trick to lean on instead.
+ * base is the *absolute* API origin (VITE_API_URL) — the app deploys to
+ * static hosts (Vercel) with no proxy layer of their own, so a same-origin
+ * relative `/v1` would 404 with no fallback. Calling the API directly means
+ * the backend must allow the app's origin(s) via CORS.
  */
 export const apiClient = axios.create({
   baseURL: `${env.VITE_API_URL}/v1`,
