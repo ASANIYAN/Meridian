@@ -1,7 +1,5 @@
 # Meridian — Frontend
 
-[![CI](https://github.com/ASANIYAN/Meridian/actions/workflows/ci.yml/badge.svg)](https://github.com/ASANIYAN/Meridian/actions/workflows/ci.yml)
-
 Meridian is a real-time collaborative document editor — Google Docs–style continuous prose, not block-based. Each document has three roles (Author, Editor, Viewer); authors get an AI chatbot that edits the document on their behalf, and can share documents via tokenized invite links with a configurable role and expiry.
 
 This repository is the **frontend** — an authenticated single-page app. The backend (NestJS WebSocket gateway, Redis pub/sub, Postgres/Drizzle) is a separate service and is treated here as a fixed contract.
