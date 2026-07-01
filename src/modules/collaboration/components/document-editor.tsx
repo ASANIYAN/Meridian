@@ -1,10 +1,5 @@
 import { useEffect } from 'react'
 import { type Editor, EditorContent, useEditor } from '@tiptap/react'
-import StarterKit from '@tiptap/starter-kit'
-import Collaboration from '@tiptap/extension-collaboration'
-import Placeholder from '@tiptap/extension-placeholder'
-import TextAlign from '@tiptap/extension-text-align'
-import Highlight from '@tiptap/extension-highlight'
 import type * as Y from 'yjs'
 import {
   DropdownMenu,
@@ -16,6 +11,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { EditorToolbar } from './editor-toolbar'
 import { exportDocument } from '../utils/export-document'
+import { createEditorExtensions } from '../editor-extensions'
 
 interface DocumentEditorProps {
   /** The already-hydrated shared doc from the route's connection (CLAUDE.md §4). */
@@ -28,12 +24,10 @@ interface DocumentEditorProps {
 
 /**
  * The real Tiptap editor (CLAUDE.md §2) — a pure consumer of the shared Y.Doc,
- * never an owner of the connection (§4 ownership rule). The official
- * Collaboration extension binds Tiptap to the doc's default XML fragment, so
+ * never an owner of the connection (§4 ownership rule). Bound to the doc's
+ * "content" fragment via the shared extension set (see editor-extensions.ts):
  * local edits flow out through the provider's `update` listener and remote
- * updates merge in via the same CRDT path. StarterKit's own undo/redo is
- * disabled because Collaboration provides Yjs-backed history instead — running
- * both would corrupt the shared history.
+ * updates merge in via the same CRDT path.
  */
 export function DocumentEditor({
   doc,
@@ -43,17 +37,9 @@ export function DocumentEditor({
   const editor = useEditor(
     {
       editable,
-      extensions: [
-        // undoRedo off → Collaboration owns history; openOnClick off → clicking a
-        // link places the cursor for editing rather than navigating away.
-        StarterKit.configure({ undoRedo: false, link: { openOnClick: false } }),
-        Collaboration.configure({ document: doc }),
-        TextAlign.configure({ types: ['heading', 'paragraph'] }),
-        Highlight,
-        Placeholder.configure({
-          placeholder: editable ? 'Start writing…' : 'This document is empty.',
-        }),
-      ],
+      // The schema/extension set is the backend content contract — see
+      // editor-extensions.ts. Bound to the shared "content" XmlFragment there.
+      extensions: createEditorExtensions({ doc, editable }),
       editorProps: {
         attributes: {
           class: 'meridian-editor focus:outline-none',
