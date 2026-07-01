@@ -112,7 +112,7 @@ export function DocumentEditor({
 function EditorCommandBar({ editor, title }: { editor: Editor | null; title: string }) {
   const exportAs = (format: 'pdf' | 'docx' | 'txt' | 'md') => {
     if (!editor) return
-    exportDocument(editor.getJSON(), title, format)
+    exportDocument(editor.getJSON(), title, format, { editorElement: editor.view.dom })
   }
 
   return (

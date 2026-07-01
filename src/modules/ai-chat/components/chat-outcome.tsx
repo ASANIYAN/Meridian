@@ -158,7 +158,7 @@ function OutcomeBody({
               {typeof outcome.operationIndex === 'number'
                 ? ` (operation #${outcome.operationIndex})`
                 : ''}
-              . Review the updated result before applying it.
+              . Review the returned diff before applying it.
             </p>
             {outcome.message && (
               <p className="text-[12.5px] text-muted-foreground">{outcome.message}</p>
@@ -171,7 +171,7 @@ function OutcomeBody({
           <ProposalActions
             proposalId={outcome.proposalId}
             action={action}
-            confirm
+            confirm={outcome.requiresConfirmation}
             onAccept={onAccept}
             onDecline={onDecline}
           />
@@ -182,12 +182,15 @@ function OutcomeBody({
       return (
         <div className="space-y-2">
           <p>
-            The document changed between when the assistant read it and when it tried to edit
+            The assistant could not safely anchor that edit
             {typeof outcome.operationIndex === 'number'
               ? ` (operation #${outcome.operationIndex})`
               : ''}
-            . Nothing was applied — review the change and try again.
+            . Nothing was proposed. Ask again with a more specific instruction.
           </p>
+          {outcome.message && (
+            <p className="text-[12.5px] text-muted-foreground">{outcome.message}</p>
+          )}
           {outcome.expectedText !== undefined && outcome.actualText !== undefined && (
             <ConflictDiff expected={outcome.expectedText} actual={outcome.actualText} />
           )}
@@ -252,6 +255,7 @@ function ReviewProposal({
       <ProposalActions
         proposalId={proposalId}
         action={action}
+        confirm={true}
         onAccept={onAccept}
         onDecline={onDecline}
       />

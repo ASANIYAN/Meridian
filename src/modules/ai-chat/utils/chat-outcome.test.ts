@@ -67,6 +67,8 @@ describe('toErrorOutcome', () => {
     )
     expect(outcome).toMatchObject({
       kind: 'content-conflict',
+      message:
+        'The assistant could not safely anchor that edit. Ask again with a more specific instruction.',
       operationIndex: 1,
       expectedText: 'old',
       actualText: 'new',
@@ -122,6 +124,7 @@ describe('toProposalAcceptErrorOutcome', () => {
       toProposalAcceptErrorOutcome(
         apiError(409, {
           message: 'Document has changed since this proposal was generated',
+          requires_confirmation: true,
           diff: { before: 'current', after: 'updated' },
           operation_index: 0,
           expected_text: 'old',
@@ -133,10 +136,29 @@ describe('toProposalAcceptErrorOutcome', () => {
       kind: 'proposal-conflict',
       proposalId: 'proposal-1',
       message: 'Document has changed since this proposal was generated',
+      requiresConfirmation: true,
       diff: { before: 'current', after: 'updated' },
       operationIndex: 0,
       expectedText: 'old',
       actualText: 'current',
+    })
+  })
+
+  it('409 without explicit confirmation falls back to a normal content conflict', () => {
+    expect(
+      toProposalAcceptErrorOutcome(
+        apiError(409, {
+          message: 'Document has changed',
+          diff: { before: 'current', after: 'updated' },
+        }),
+        'proposal-1',
+      ),
+    ).toEqual({
+      kind: 'content-conflict',
+      message: 'Document has changed',
+      operationIndex: undefined,
+      expectedText: undefined,
+      actualText: undefined,
     })
   })
 
