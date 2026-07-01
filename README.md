@@ -31,10 +31,9 @@ Validated at startup (`src/config/env.ts`) and must be a valid URL:
 | `VITE_API_URL` | REST API origin (the `/v1` prefix is added by the client) | `http://localhost:8000` |
 
 The REST client calls `VITE_API_URL` directly, in every environment — there's
-no dev proxy or nginx proxy in front of it (see [Dockerfile](Dockerfile) /
-[nginx.conf](nginx.conf)), since a same-origin relative path only works behind
-something that proxies it, and static hosts like Vercel have no such layer.
-**The backend must allow the app's origin via CORS.**
+no proxy in front of it, since the app deploys to static hosts (Vercel) with
+no proxy layer of their own. **The backend must allow the app's origin via
+CORS.**
 
 The WS gateway rides this same origin — no separate port or env var. The
 collaboration provider derives its WS URL from `VITE_API_URL` (`http` →
@@ -63,11 +62,9 @@ npx playwright install chromium   # one-time, before the first e2e run
 npm run test:e2e
 ```
 
-## Production image
+## Deployment
 
-```bash
-docker build -t meridian-frontend --build-arg VITE_API_URL=https://your-api .
-docker run -p 8080:80 meridian-frontend
-```
-
-Multi-stage build (Node → nginx); nginx serves the SPA as static files with history fallback — no REST proxying, since the app calls `VITE_API_URL` directly.
+Deploys as a static build (`npm run build` → `dist/`) to Vercel — set
+`VITE_API_URL` in the project's environment variables and configure a SPA
+history-fallback rewrite (`/(.*) → /index.html`) so client-side routes (e.g.
+`/documents/:id`) resolve on a hard refresh.
