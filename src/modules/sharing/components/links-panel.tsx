@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
+import { SelectField } from '@/components/custom-components/select-field'
 import type { GrantableRole, ShareLink } from '../types/sharing.types'
 import { useCreateShareLink } from '../hooks/use-create-share-link'
 import { useRevokeShareLink } from '../hooks/use-revoke-share-link'
@@ -37,22 +39,16 @@ export function LinksPanel({ documentId }: { documentId: string }) {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-end gap-2">
-        <div className="space-y-1.5">
-          <label
-            htmlFor="link-role"
-            className="text-[13px] font-medium leading-none text-foreground"
-          >
-            Role
-          </label>
-          <select
+        <div className="flex w-28 shrink-0 flex-col gap-1.5">
+          <Label htmlFor="link-role">Role</Label>
+          <SelectField
             id="link-role"
             value={role}
             onChange={(e) => setRole(e.target.value as GrantableRole)}
-            className="h-11 rounded-md border border-border bg-card px-2.5 text-[13.5px] text-foreground outline-none focus-visible:ring-[3px] focus-visible:ring-ring/25"
           >
             <option value="viewer">Viewer</option>
             <option value="editor">Editor</option>
-          </select>
+          </SelectField>
         </div>
 
         <label className="flex h-11 cursor-pointer items-center gap-2 text-[13px] text-foreground">
