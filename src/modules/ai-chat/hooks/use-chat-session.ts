@@ -19,6 +19,17 @@ import type { ChatOutcome, ChatTurn } from '../types/ai-chat.types'
 export function useChatSession(documentId: string) {
   const [turns, setTurns] = useState<ChatTurn[]>([])
 
+  const hasActionableProposal = useCallback(
+    (turnId: string, proposalId: string) =>
+      turns.some(
+        (turn) =>
+          turn.id === turnId &&
+          (turn.outcome?.kind === 'proposal' || turn.outcome?.kind === 'proposal-conflict') &&
+          turn.outcome.proposalId === proposalId,
+      ),
+    [turns],
+  )
+
   const resolveTurn = useCallback((turnId: string, outcome: ChatOutcome) => {
     setTurns((prev) =>
       prev.map((t) => (t.id === turnId ? { ...t, status: 'done', outcome, action: undefined } : t)),
@@ -72,19 +83,21 @@ export function useChatSession(documentId: string) {
   )
 
   const accept = useCallback(
-    (turnId: string, proposalId: string, confirm = false) => {
+    (turnId: string, proposalId: string, confirm = true) => {
       if (acceptMutation.isPending || declineMutation.isPending) return
+      if (!hasActionableProposal(turnId, proposalId)) return
       acceptMutation.mutate({ turnId, proposalId, confirm })
     },
-    [acceptMutation, declineMutation.isPending],
+    [acceptMutation, declineMutation.isPending, hasActionableProposal],
   )
 
   const decline = useCallback(
     (turnId: string, proposalId: string) => {
       if (acceptMutation.isPending || declineMutation.isPending) return
+      if (!hasActionableProposal(turnId, proposalId)) return
       declineMutation.mutate({ turnId, proposalId })
     },
-    [acceptMutation.isPending, declineMutation],
+    [acceptMutation.isPending, declineMutation, hasActionableProposal],
   )
 
   return {

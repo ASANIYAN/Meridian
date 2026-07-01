@@ -8,10 +8,14 @@ interface AuthState {
   token: string | null
   isVerified: boolean
   setSession: (session: { user: User; token: string }) => void
+  rotateToken: (token: string) => void
   clearSession: () => void
 }
 
-type AuthBroadcast = { type: 'session'; user: User; token: string } | { type: 'clear' }
+type AuthBroadcast =
+  | { type: 'session'; user: User; token: string }
+  | { type: 'token'; token: string }
+  | { type: 'clear' }
 
 const authChannel =
   typeof BroadcastChannel === 'undefined' ? null : new BroadcastChannel('meridian-auth')
@@ -33,6 +37,9 @@ export const useAuthStore = create<AuthState>()(
             token: event.data.token,
             isVerified: event.data.user.verifiedAt !== null,
           })
+        } else if (event.data.type === 'token') {
+          const { token } = event.data
+          set((state) => (state.user ? { token } : state))
         } else {
           set({ user: null, token: null, isVerified: false })
         }
@@ -45,6 +52,10 @@ export const useAuthStore = create<AuthState>()(
         setSession: ({ user, token }) => {
           set({ user, token, isVerified: user.verifiedAt !== null })
           authChannel?.postMessage({ type: 'session', user, token } satisfies AuthBroadcast)
+        },
+        rotateToken: (token) => {
+          set((state) => (state.user ? { token } : state))
+          authChannel?.postMessage({ type: 'token', token } satisfies AuthBroadcast)
         },
         clearSession: () => {
           set({ user: null, token: null, isVerified: false })

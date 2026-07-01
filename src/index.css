@@ -147,6 +147,8 @@
    .meridian-editor so it never leaks into the rest of the app. No typography
    plugin; these are the document's own prose rules. */
 .meridian-editor {
+  --editor-link-color: var(--accent);
+
   width: 100%;
   max-width: 72ch;
   min-height: clamp(26rem, 62vh, 58rem);
@@ -225,7 +227,7 @@
   padding: 0;
 }
 .meridian-editor a {
-  color: var(--accent);
+  color: var(--editor-link-color);
   text-decoration: underline;
   text-underline-offset: 2px;
 }

@@ -13,3 +13,13 @@ export function decodeJwt<T = Record<string, unknown>>(token: string): T | null 
     return null
   }
 }
+
+export function getJwtExpiryMs(token: string): number | null {
+  const claims = decodeJwt<{ exp?: unknown }>(token)
+  return typeof claims?.exp === 'number' ? claims.exp * 1000 : null
+}
+
+export function isJwtExpiringSoon(token: string, windowMs = 120_000): boolean {
+  const expiry = getJwtExpiryMs(token)
+  return expiry != null && expiry - Date.now() <= windowMs
+}

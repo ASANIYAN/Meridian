@@ -25,6 +25,7 @@ export type ChatOutcome =
       kind: 'proposal-conflict'
       proposalId: string
       message: string
+      requiresConfirmation: boolean
       diff?: AiEditDiff
       operationIndex?: number
       expectedText?: string

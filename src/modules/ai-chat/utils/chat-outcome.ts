@@ -35,8 +35,9 @@ function readDiff(value: unknown): AiEditDiff | undefined {
  * Map a failed chat request to an outcome by HTTP status (CLAUDE.md §9, confirmed
  * against backend PR #48). 409 carries `operation_index`/`expected_text`/
  * `actual_text` (forwarded intact by the GlobalExceptionFilter); 422 and 400
- * carry a `reason` surfaced via `message`. `check` (content_existence vs scope)
- * is a redundant confirmation of the status code, so we key off status alone.
+ * carry a `reason` surfaced via `message`. A proposal-time content_existence 409
+ * means the assistant could not safely anchor its proposed edit, not that there
+ * is a usable proposal to review.
  * Anything uncategorized (e.g. a 500 or a network failure) becomes `kind: 'error'`.
  */
 export function toErrorOutcome(error: unknown): ChatOutcome {
@@ -50,7 +51,10 @@ export function toErrorOutcome(error: unknown): ChatOutcome {
     case 409:
       return {
         kind: 'content-conflict',
-        message,
+        message:
+          body?.check === 'content_existence'
+            ? 'The assistant could not safely anchor that edit. Ask again with a more specific instruction.'
+            : message,
         operationIndex:
           typeof body?.operation_index === 'number' ? body.operation_index : undefined,
         expectedText: typeof body?.expected_text === 'string' ? body.expected_text : undefined,
@@ -71,6 +75,7 @@ export function toErrorOutcome(error: unknown): ChatOutcome {
 
 export function toProposalAcceptErrorOutcome(error: unknown, proposalId: string): ChatOutcome {
   const status = getApiErrorStatus(error)
+  if (status === 410) return toErrorOutcome(error)
   if (status !== 409) return toErrorOutcome(error)
 
   const message = getApiErrorMessage(error)
@@ -78,13 +83,18 @@ export function toProposalAcceptErrorOutcome(error: unknown, proposalId: string)
     ? (error.response?.data as Record<string, unknown> | undefined)
     : undefined
 
-  return {
-    kind: 'proposal-conflict',
-    proposalId,
-    message,
-    diff: readDiff(body?.diff),
-    operationIndex: typeof body?.operation_index === 'number' ? body.operation_index : undefined,
-    expectedText: typeof body?.expected_text === 'string' ? body.expected_text : undefined,
-    actualText: typeof body?.actual_text === 'string' ? body.actual_text : undefined,
+  if (body?.requires_confirmation === true) {
+    return {
+      kind: 'proposal-conflict',
+      proposalId,
+      message,
+      requiresConfirmation: true,
+      diff: readDiff(body.diff),
+      operationIndex: typeof body.operation_index === 'number' ? body.operation_index : undefined,
+      expectedText: typeof body.expected_text === 'string' ? body.expected_text : undefined,
+      actualText: typeof body.actual_text === 'string' ? body.actual_text : undefined,
+    }
   }
+
+  return toErrorOutcome(error)
 }
