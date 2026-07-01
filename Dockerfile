@@ -15,15 +15,14 @@ RUN npm ci
 
 COPY . .
 
-# VITE_* are baked into the bundle at build time and validated by src/config/env.ts,
-# so both must be valid URLs. VITE_API_URL is only used by the dev proxy/env check
-# (the client calls the relative /v1 in production), but VITE_WS_URL is the real
-# WebSocket gateway the browser connects to — override it per deployment:
-#   docker build --build-arg VITE_WS_URL=wss://gateway.example.com .
+# VITE_API_URL is baked into the bundle at build time and validated by
+# src/config/env.ts. In production the REST client calls the relative /v1 (see
+# the nginx proxy below), so this value's main job is env validation — except
+# for WS: the gateway rides the API's own origin/port (no separate WS_PORT),
+# so the provider derives ws(s):// from this same URL. Override per deployment:
+#   docker build --build-arg VITE_API_URL=https://api.example.com .
 ARG VITE_API_URL=http://localhost:8000
-ARG VITE_WS_URL=ws://localhost:8001
-ENV VITE_API_URL=$VITE_API_URL \
-    VITE_WS_URL=$VITE_WS_URL
+ENV VITE_API_URL=$VITE_API_URL
 RUN npm run build
 
 # --- Stage 2: serve with nginx ---

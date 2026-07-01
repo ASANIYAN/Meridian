@@ -27,7 +27,6 @@ export default defineConfig({
     timeout: 120_000,
     env: {
       VITE_API_URL: 'http://localhost:8000',
-      VITE_WS_URL: 'ws://localhost:8001',
     },
   },
 })
