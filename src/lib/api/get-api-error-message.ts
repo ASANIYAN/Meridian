@@ -16,6 +16,8 @@
  */
 
 const FALLBACK_MESSAGE = 'Something went wrong. Please try again.'
+const NETWORK_FALLBACK_MESSAGE =
+  'Unable to reach the server. Please check your connection and try again.'
 
 interface ApiErrorBody {
   statusCode?: number
@@ -56,6 +58,10 @@ export function getApiErrorMessage(error: unknown): string {
     const fromMessage = firstMessage(data?.message)
     if (fromMessage) return fromMessage
     if (data?.error && data.error.trim()) return data.error
+    // No HTTP response was ever reached (timeout, aborted, DNS/network failure) —
+    // axios's own message ("timeout of 15000ms exceeded", "Network Error") is a
+    // technical detail, not something to surface to the user.
+    if (!error.response) return NETWORK_FALLBACK_MESSAGE
     if (error.message && error.message.trim()) return error.message
     return FALLBACK_MESSAGE
   }
