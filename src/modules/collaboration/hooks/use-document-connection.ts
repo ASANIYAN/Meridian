@@ -36,7 +36,7 @@ export function useDocumentConnection(documentId: string, role?: Role): Collabor
     if (!token) return
 
     const provider = new MeridianProvider({
-      url: env.VITE_WS_URL,
+      url: env.wsUrl,
       token,
       documentId,
       doc,

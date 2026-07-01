@@ -15,7 +15,6 @@ const urlString = z.string().refine(
 
 const envSchema = z.object({
   VITE_API_URL: urlString,
-  VITE_WS_URL: urlString,
 })
 
 const parsed = envSchema.safeParse(import.meta.env)
@@ -29,7 +28,22 @@ if (!parsed.success) {
 }
 
 /**
+ * The WS gateway no longer runs on its own port — it rides the API's own
+ * origin, so the WS URL is derived from VITE_API_URL rather than configured
+ * separately: http(s) becomes ws(s), same host, no explicit port (443/80
+ * defaults apply exactly as they do for the API's own scheme).
+ */
+function toWebSocketUrl(apiUrl: string): string {
+  const url = new URL(apiUrl)
+  url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:'
+  return url.origin
+}
+
+/**
  * Validated environment. Every env access in the app goes through this object,
  * never `import.meta.env` directly (FE-SETUP-5).
  */
-export const env = parsed.data
+export const env = {
+  ...parsed.data,
+  wsUrl: toWebSocketUrl(parsed.data.VITE_API_URL),
+}

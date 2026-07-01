@@ -24,14 +24,17 @@ npm run dev
 
 ### Environment
 
-Both are validated at startup (`src/config/env.ts`) and must be valid URLs:
+Validated at startup (`src/config/env.ts`) and must be a valid URL:
 
 | Variable       | Description                                               | Example                 |
 | -------------- | --------------------------------------------------------- | ----------------------- |
 | `VITE_API_URL` | REST API origin (the `/v1` prefix is added by the client) | `http://localhost:8000` |
-| `VITE_WS_URL`  | WebSocket gateway origin (separate port from REST)        | `ws://localhost:8001`   |
 
 In development the Vite dev server proxies `/v1` to `VITE_API_URL`; in production nginx does the same (see [Dockerfile](Dockerfile) / [nginx.conf.template](nginx.conf.template)).
+
+The WS gateway rides this same origin — no separate port or env var. The
+collaboration provider derives its WS URL from `VITE_API_URL` (`http` →
+`ws`, `https` → `wss`, same host, no explicit port).
 
 ## Scripts
 
@@ -59,7 +62,7 @@ npm run test:e2e
 ## Production image
 
 ```bash
-docker build -t meridian-frontend --build-arg VITE_WS_URL=wss://your-gateway .
+docker build -t meridian-frontend --build-arg VITE_API_URL=https://your-api .
 docker run -p 8080:80 -e API_UPSTREAM=http://your-api:8000 meridian-frontend
 ```
 
