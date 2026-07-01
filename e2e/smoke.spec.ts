@@ -39,7 +39,7 @@ test.describe('Meridian smoke', () => {
     await page.getByRole('button', { name: 'Continue' }).click()
 
     await expect(page).toHaveURL(/\/documents$/)
-    await expect(page.getByRole('heading', { name: 'Documents' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Documents', exact: true })).toBeVisible()
     await expect(page.getByText('No documents yet')).toBeVisible()
   })
 
