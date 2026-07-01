@@ -10,12 +10,19 @@ interface GraticuleProps {
   meridians?: number
   rings?: number
   className?: string
+  /** Focal point as a fraction of the viewBox (0–1). Defaults to the right seam. */
+  focal?: { x: number; y: number }
+  /** Angular sweep (radians) the lines/arcs cover, starting at `arcStart`.
+   *  Defaults to a sweep aimed away from the right edge. Pass a full turn
+   *  (Math.PI * 2) for a focal point away from any edge, so the pattern
+   *  radiates symmetrically instead of favoring one side. */
+  sweep?: number
+  /** Angle (radians) the sweep starts from. */
+  arcStart?: number
 }
 
 const W = 900
 const H = 1000
-const FX = W // focal point sits on the right seam
-const FY = H * 0.5
 
 /**
  * The convergence graticule — meridians and parallels that converge to a single
@@ -27,14 +34,21 @@ export function Graticule({
   meridians = 15,
   rings = 7,
   className,
+  focal = { x: 1, y: 0.5 },
+  sweep = Math.PI * 0.8,
+  arcStart = Math.PI * 0.6,
 }: GraticuleProps) {
   const maskId = useId()
+  const FX = W * focal.x
+  const FY = H * focal.y
+  const maskCx = `${focal.x * 100}%`
+  const maskCy = `${focal.y * 100}%`
 
   const lines = useMemo(() => {
     const out: { x2: number; y2: number; opacity: number; delay: number }[] = []
     for (let i = 0; i <= meridians; i++) {
       const t = i / meridians
-      const angle = Math.PI * (0.62 + t * 0.76)
+      const angle = arcStart + t * sweep
       const len = W * 1.5
       const near = 1 - Math.abs(t - 0.5) * 2
       out.push({
@@ -45,26 +59,27 @@ export function Graticule({
       })
     }
     return out
-  }, [meridians])
+  }, [meridians, FX, FY, arcStart, sweep])
 
   const arcs = useMemo(() => {
     const out: { d: string; opacity: number; delay: number }[] = []
     for (let r = 1; r <= rings; r++) {
       const rad = (W / rings) * r * 0.92
-      const a0 = Math.PI * 0.6
-      const a1 = Math.PI * 1.4
+      const a0 = arcStart
+      const a1 = arcStart + sweep
       const x0 = FX + Math.cos(a0) * rad
       const y0 = FY + Math.sin(a0) * rad
       const x1 = FX + Math.cos(a1) * rad
       const y1 = FY + Math.sin(a1) * rad
+      const largeArc = sweep > Math.PI ? 1 : 0
       out.push({
-        d: `M ${x0} ${y0} A ${rad} ${rad} 0 0 1 ${x1} ${y1}`,
+        d: `M ${x0} ${y0} A ${rad} ${rad} 0 ${largeArc} 1 ${x1} ${y1}`,
         opacity: 0.05 + (r / rings) * 0.05,
         delay: 140 + r * 55,
       })
     }
     return out
-  }, [rings])
+  }, [rings, FX, FY, arcStart, sweep])
 
   const animate = state !== 'static'
 
@@ -77,7 +92,7 @@ export function Graticule({
     >
       <defs>
         {/* Fade everything away from the focal node so convergence reads first. */}
-        <radialGradient id={`${maskId}-grad`} cx="100%" cy="50%" r="78%">
+        <radialGradient id={`${maskId}-grad`} cx={maskCx} cy={maskCy} r="78%">
           <stop offset="0%" stopColor="#fff" />
           <stop offset="55%" stopColor="#888" />
           <stop offset="100%" stopColor="#000" />
