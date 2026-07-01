@@ -61,10 +61,3 @@ Unit tests live alongside source in `src/**` (Vitest); end-to-end smoke tests li
 npx playwright install chromium   # one-time, before the first e2e run
 npm run test:e2e
 ```
-
-## Deployment
-
-Deploys as a static build (`npm run build` → `dist/`) to Vercel — set
-`VITE_API_URL` in the project's environment variables and configure a SPA
-history-fallback rewrite (`/(.*) → /index.html`) so client-side routes (e.g.
-`/documents/:id`) resolve on a hard refresh.
