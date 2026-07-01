@@ -18,7 +18,7 @@ export function AuthLayout({ children, lede }: AuthLayoutProps) {
   return (
     <div className="chart grid min-h-dvh bg-background text-foreground md:grid-cols-[1.08fr_0.92fr]">
       {/* Left — the chart */}
-      <section className="relative flex min-h-60 flex-col items-center justify-center gap-8 overflow-hidden border-b border-(--seam) p-10 text-center md:border-r md:border-b-0 md:p-[clamp(2.5rem,5vw,4.5rem)]">
+      <section className="relative flex min-h-60 flex-col items-center justify-center gap-6 overflow-hidden border-b border-(--seam) p-9 text-center md:border-r md:border-b-0 md:p-[clamp(2.15rem,4.3vw,3.85rem)]">
         <div
           className="absolute inset-0"
           style={{
@@ -26,7 +26,7 @@ export function AuthLayout({ children, lede }: AuthLayoutProps) {
               'radial-gradient(120% 90% at 100% 50%, rgba(205,163,73,0.05), transparent 55%), radial-gradient(100% 100% at 30% 30%, #122033, var(--ink) 70%)',
           }}
         />
-        <Graticule state="idle" />
+        <Graticule state="idle" focal={{ x: 0.5, y: 0.36 }} sweep={Math.PI * 2} arcStart={0} />
 
         <div className="relative">
           <Wordmark />
@@ -39,10 +39,15 @@ export function AuthLayout({ children, lede }: AuthLayoutProps) {
             </>
           )}
         </h1>
+
+        <p className="relative max-w-[34ch] text-sm leading-relaxed text-muted-foreground">
+          Meridian is a real-time collaborative document editor — write, review, and edit together,
+          with every change merging instantly and safely.
+        </p>
       </section>
 
       {/* Right — the instrument plate */}
-      <section className="flex items-center justify-center bg-background p-[clamp(1.75rem,4vw,4rem)]">
+      <section className="flex items-center justify-center bg-background p-[clamp(1.5rem,3.4vw,3.4rem)]">
         {children}
       </section>
     </div>

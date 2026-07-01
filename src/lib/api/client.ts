@@ -25,6 +25,10 @@ export function unwrap<T>(response: AxiosResponse<ApiEnvelope<T>>): T {
 export const apiClient = axios.create({
   baseURL: `${env.VITE_API_URL}/v1`,
   headers: { 'Content-Type': 'application/json' },
+  // Without this, a hung request (dead connection, stalled backend) leaves any
+  // caller's mutation/query in a permanently unsettled state — no error, no
+  // success, just an indefinite spinner with no way out.
+  timeout: 15_000,
 })
 
 // Attach the JWT from the auth store to every authenticated request (FE-AUTH-7).

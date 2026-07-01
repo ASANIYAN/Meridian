@@ -17,7 +17,8 @@ export function AuthPlate({ children, onSubmit, className }: AuthPlateProps) {
       onSubmit={onSubmit ?? ((e) => e.preventDefault())}
       className={cn(
         'stagger w-full max-w-95 space-y-5 rounded-md border border-border bg-card p-7.5',
-        'shadow-[0_1px_0_rgba(255,255,255,0.03)_inset,0_24px_60px_-32px_rgba(0,0,0,0.7)]',
+        'shadow-[0_1px_0_rgba(255,255,255,0.03)_inset,0_1px_0_rgba(205,163,73,0.35)_inset,0_32px_72px_-28px_rgba(0,0,0,0.75)]',
+        'ring-1 ring-(--seam)/40',
         className,
       )}
     >
