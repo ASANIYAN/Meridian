@@ -1,5 +1,7 @@
+import { Link } from 'react-router-dom'
 import { AuthLayout } from '@/components/custom-components/auth-layout'
 import { AuthPlate } from '@/components/custom-components/auth-plate'
+import { Button } from '@/components/ui/button'
 import { Cartouche } from '@/components/custom-components/cartouche'
 import { FormField } from '@/components/custom-components/form-field'
 import { FormError } from '@/components/custom-components/form-error'
@@ -9,7 +11,7 @@ import { MonoLink } from '../components/auth-links'
 import { useResetPassword } from '../hooks/use-reset-password'
 
 export function ResetPasswordView() {
-  const { form, onSubmit, isPending, hasToken } = useResetPassword()
+  const { form, onSubmit, isPending, hasToken, succeeded } = useResetPassword()
   const rootError = form.formState.errors.root?.message
 
   return (
@@ -21,7 +23,20 @@ export function ResetPasswordView() {
       }
     >
       <AuthPlate onSubmit={onSubmit}>
-        {!hasToken ? (
+        {succeeded ? (
+          <AuthNotice
+            tone="success"
+            coordinate=""
+            title="New password"
+            heading="Password updated"
+            description="Your password has been changed. Sign in with your new password."
+            footer={
+              <Button asChild variant="accent" size="lg" className="w-full">
+                <Link to="/login">Continue to sign in</Link>
+              </Button>
+            }
+          />
+        ) : !hasToken ? (
           <AuthNotice
             tone="error"
             coordinate=""

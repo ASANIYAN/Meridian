@@ -33,7 +33,16 @@ export function SignupView() {
                 Open it to start writing.
               </>
             }
-            footer={<MonoLink to="/login">Back to sign in</MonoLink>}
+            footer={
+              <div className="space-y-3">
+                <AltPrompt
+                  prompt="Didn't get the email?"
+                  to={`/resend-verification?email=${encodeURIComponent(email)}`}
+                  action="Resend link"
+                />
+                <MonoLink to="/login">Back to sign in</MonoLink>
+              </div>
+            }
           />
         ) : (
           <>
