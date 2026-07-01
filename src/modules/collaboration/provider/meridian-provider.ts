@@ -170,6 +170,8 @@ export class MeridianProvider {
       }
     }, this)
 
+    if (import.meta.env.DEV) this.logDocStructure()
+
     // participants is a MAP { userId: displayName }, not an array (CLAUDE.md §4).
     this.presentUsers = flattenParticipants(d.participants)
     this.opts.onPresence(this.presentUsers)
@@ -178,6 +180,25 @@ export class MeridianProvider {
     this.opts.onStatus('connected')
     // Re-send anything left unacked from before a reconnect.
     this.flushPending()
+  }
+
+  /**
+   * DEV-only: dump each root shared type and the constructor names of its
+   * top-level children. Reveals whether the server sent ProseMirror-shaped
+   * content (top-level children all `YXmlElement`) or bare text at the root
+   * (which y-tiptap can't render — `el.toArray is not a function`).
+   */
+  private logDocStructure() {
+    this.opts.doc.share.forEach((type, name) => {
+      const anyType = type as unknown as {
+        toArray?: () => Array<{ constructor?: { name?: string } }>
+      }
+      const children =
+        typeof anyType.toArray === 'function'
+          ? anyType.toArray().map((n) => n?.constructor?.name ?? typeof n)
+          : `(no toArray — ${type.constructor?.name})`
+      console.debug(`[meridian] root "${name}" →`, children)
+    })
   }
 
   private handleAck(data: unknown) {

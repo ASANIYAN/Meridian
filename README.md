@@ -10,7 +10,7 @@ This repository is the **frontend** — an authenticated single-page app. The ba
 - **Tailwind CSS** + **shadcn/ui** — primitives in `components/ui/`, compositions in `components/custom-components/`
 - **React Router** for routing, **TanStack Query** for all REST data, **Zustand** for session/auth + toasts
 - **React Hook Form** + **Zod** for forms and validation
-- **Tiptap** (ProseMirror) with **Yjs** for the collaborative editor, over a hand-written WebSocket provider that speaks the backend's mixed JSON/binary protocol
+- **Tiptap** (ProseMirror) with **Yjs** for the collaborative editor — bound to a shared `content` XmlFragment whose schema is defined once in `modules/collaboration/editor-extensions.ts` (the contract the backend must mirror), over a hand-written WebSocket provider that speaks the backend's mixed JSON/binary protocol
 
 ## Getting started
 

@@ -1,3 +1,5 @@
+import { useNavigate } from 'react-router-dom'
+import { ErrorBoundary } from '@/components/custom-components/error-boundary'
 import { useCollaboration } from '../hooks/use-collaboration'
 import { DocumentEditor } from './document-editor'
 
@@ -25,5 +27,49 @@ export function DocumentWorkspace({ title }: DocumentWorkspaceProps) {
     )
   }
 
-  return <DocumentEditor doc={doc} title={title} editable={role !== 'viewer'} />
+  // Contain a render-time crash from malformed content (top-level nodes that
+  // aren't blocks → y-tiptap throws `el.toArray is not a function` at mount).
+  // Only the editing surface degrades; the connection/presence/status chrome
+  // stays alive, and it resets when `doc` changes. Safety net for the initial
+  // load — the real fix for malformed content is server-side.
+  return (
+    <ErrorBoundary
+      resetKeys={[doc]}
+      onError={(error) =>
+        console.error('[meridian] editor failed to render document content', error)
+      }
+      fallback={<EditorErrorFallback />}
+    >
+      <DocumentEditor doc={doc} title={title} editable={role !== 'viewer'} />
+    </ErrorBoundary>
+  )
+}
+
+/**
+ * Shown when the editor can't render the hydrated document. This is a data-shape
+ * problem (malformed content), not a transient/network error — so it offers a
+ * way out rather than a retry, which would just re-crash on the same content.
+ */
+function EditorErrorFallback() {
+  const navigate = useNavigate()
+  return (
+    <div className="flex flex-1 flex-col items-center justify-center gap-4 bg-muted/60 px-6 text-center">
+      <div className="space-y-1.5">
+        <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+          This document couldn’t be displayed
+        </p>
+        <p className="max-w-sm text-sm text-muted-foreground">
+          Its content is in a format the editor can’t open. This usually needs to be repaired before
+          it will load.
+        </p>
+      </div>
+      <button
+        type="button"
+        onClick={() => navigate('/documents')}
+        className="rounded-full border border-border bg-background px-4 py-1.5 text-sm text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/35"
+      >
+        Back to documents
+      </button>
+    </div>
+  )
 }
