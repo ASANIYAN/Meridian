@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import { useToastStore } from '@/store/toast-store'
 import { resetPassword } from '../api/auth-api'
 import { resetPasswordSchema, type ResetPasswordValues } from '../utils/schemas'
@@ -10,14 +10,13 @@ import { resetPasswordSchema, type ResetPasswordValues } from '../utils/schemas'
  * Reset-password (FE-AUTH-6). The link carries both `email` and `token` in the
  * URL; confirmPassword is validated locally and stripped — only
  * { email, token, newPassword } reaches the API (CLAUDE.md §7). On success,
- * redirect to /login with a toast; on failure, one generic invalid-or-expired
- * message.
+ * the view swaps to an in-page confirmation with a sign-in CTA (consistent with
+ * verify-email); on failure, one generic invalid-or-expired message.
  */
 export function useResetPassword() {
   const [params] = useSearchParams()
   const email = params.get('email')
   const token = params.get('token')
-  const navigate = useNavigate()
   const addToast = useToastStore((s) => s.addToast)
 
   const form = useForm<ResetPasswordValues>({
@@ -31,7 +30,6 @@ export function useResetPassword() {
       resetPassword({ email: email ?? '', token: token ?? '', newPassword: values.password }),
     onSuccess: () => {
       addToast({ message: 'Password updated. Sign in with your new password.', variant: 'success' })
-      navigate('/login', { replace: true })
     },
     onError: () => {
       form.setError('root', { message: 'This link is invalid or has expired. Request a new one.' })
@@ -43,5 +41,11 @@ export function useResetPassword() {
     mutation.mutate(values)
   })
 
-  return { form, onSubmit, isPending: mutation.isPending, hasToken: !!email && !!token }
+  return {
+    form,
+    onSubmit,
+    isPending: mutation.isPending,
+    hasToken: !!email && !!token,
+    succeeded: mutation.isSuccess,
+  }
 }

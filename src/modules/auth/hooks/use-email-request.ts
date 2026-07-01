@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
+import { useSearchParams } from 'react-router-dom'
 import { getApiErrorStatus } from '@/lib/api/get-api-error-message'
 import { useToastStore } from '@/store/toast-store'
 import { forgotPassword, resendVerification } from '../api/auth-api'
@@ -16,12 +17,14 @@ import { emailRequestSchema, type EmailRequestValues } from '../utils/schemas'
  */
 function useEmailRequest(request: (email: string) => Promise<void>, successToast: string) {
   const [done, setDone] = useState(false)
+  const [params] = useSearchParams()
   const addToast = useToastStore((s) => s.addToast)
 
   const form = useForm<EmailRequestValues>({
     resolver: zodResolver(emailRequestSchema),
     mode: 'onBlur',
-    defaultValues: { email: '' },
+    // Prefilled when arriving from the signup "resend" link (?email=…).
+    defaultValues: { email: params.get('email') ?? '' },
   })
 
   const mutation = useMutation({

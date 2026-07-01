@@ -18,7 +18,7 @@ export function AuthLayout({ children, lede }: AuthLayoutProps) {
   return (
     <div className="chart grid min-h-dvh bg-background text-foreground md:grid-cols-[1.08fr_0.92fr]">
       {/* Left — the chart */}
-      <section className="relative flex min-h-60 flex-col justify-between overflow-hidden border-b border-(--seam) p-10 md:border-r md:border-b-0 md:p-[clamp(2.5rem,5vw,4.5rem)]">
+      <section className="relative flex min-h-60 flex-col items-center justify-center gap-8 overflow-hidden border-b border-(--seam) p-10 text-center md:border-r md:border-b-0 md:p-[clamp(2.5rem,5vw,4.5rem)]">
         <div
           className="absolute inset-0"
           style={{

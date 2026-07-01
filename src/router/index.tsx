@@ -11,6 +11,7 @@ import { ClaimView } from '@/modules/join/views/claim'
 import { DocumentsView } from '@/modules/documents/views/documents'
 import { RequireAuth } from './require-auth'
 import { RouteFallback } from '@/components/custom-components/route-fallback'
+import { NotFoundView } from '@/components/custom-components/not-found'
 import { AppShellPreview } from '@/dev/app-shell-preview'
 
 // The document route pulls in yjs + the provider; load it on demand so the
@@ -57,4 +58,7 @@ export const router = createBrowserRouter([
   },
 
   { path: '/preview/app', element: <AppShellPreview /> },
+
+  // Catch-all — any unmatched route lands on the 404 screen.
+  { path: '*', element: <NotFoundView /> },
 ])
