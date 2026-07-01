@@ -1,7 +1,9 @@
 import { Controller } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
 import { FormField } from '@/components/custom-components/form-field'
 import { FormError } from '@/components/custom-components/form-error'
+import { SelectField } from '@/components/custom-components/select-field'
 import { useAddMember } from '../hooks/use-add-member'
 
 /** Add a member by email + role (FE-SHARE-3). Author-only; mounted in the
@@ -13,8 +15,8 @@ export function AddMemberForm({ documentId }: { documentId: string }) {
   return (
     <form onSubmit={onSubmit} className="space-y-3">
       <FormError message={rootError} />
-      <div className="flex items-start gap-2">
-        <div className="flex-1">
+      <div className="flex flex-wrap items-start gap-2">
+        <div className="min-w-45 flex-1">
           <FormField
             control={form.control}
             name="email"
@@ -24,25 +26,16 @@ export function AddMemberForm({ documentId }: { documentId: string }) {
             autoComplete="off"
           />
         </div>
-        <div className="space-y-1.5">
-          <label
-            htmlFor="add-member-role"
-            className="text-[13px] font-medium leading-none text-foreground"
-          >
-            Role
-          </label>
+        <div className="flex w-28 shrink-0 flex-col gap-1.5">
+          <Label htmlFor="add-member-role">Role</Label>
           <Controller
             control={form.control}
             name="role"
             render={({ field }) => (
-              <select
-                id="add-member-role"
-                {...field}
-                className="h-11 rounded-md border border-border bg-card px-2.5 text-[13.5px] text-foreground outline-none focus-visible:ring-[3px] focus-visible:ring-ring/25"
-              >
+              <SelectField id="add-member-role" {...field}>
                 <option value="viewer">Viewer</option>
                 <option value="editor">Editor</option>
-              </select>
+              </SelectField>
             )}
           />
         </div>
