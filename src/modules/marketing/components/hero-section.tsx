@@ -36,7 +36,7 @@ export function HeroSection() {
         arcStart={0}
       />
 
-      <div className="stagger relative mx-auto flex max-w-[72rem] flex-col items-center gap-8 px-6 py-24 text-center md:py-32">
+      <div className="stagger relative mx-auto flex max-w-6xl flex-col items-center gap-8 px-6 py-24 text-center md:py-32">
         <p className="font-mono text-[11px] font-medium uppercase tracking-[0.28em] text-muted-foreground">
           Real-time · Multiplayer · Prose
         </p>
@@ -59,7 +59,7 @@ export function HeroSection() {
           </Button>
         </div>
 
-        <div className="mt-6 w-full max-w-[30rem]">
+        <div className="mt-6 w-full max-w-120">
           <ConvergenceDemo />
         </div>
       </div>
