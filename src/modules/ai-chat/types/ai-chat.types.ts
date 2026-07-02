@@ -53,4 +53,7 @@ export interface ChatTurn {
   /** Set once the request settles — success or failure. */
   outcome?: ChatOutcome
   action?: 'accepting' | 'declining'
+  /** The in-flight `POST /chat[/propose]` request this turn is waiting on — set
+   *  once the 202 response arrives, used to match the later WS result frame. */
+  requestId?: string
 }

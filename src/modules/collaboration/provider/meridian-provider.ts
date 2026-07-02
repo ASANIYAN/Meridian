@@ -3,7 +3,9 @@ import type { Role } from '@/types/document'
 import { classifyClose, type CloseAction } from './close-codes'
 import { base64ToBytes, coerceBytes, encodeJoinMessage, encodeUpdateMessage } from './frames'
 import { applyPresenceUpdate, flattenParticipants, parsePresenceFrame } from './presence'
+import { parseAiChatEvent } from './ai-chat-events'
 import type { ConnectionStatus, PresentUser } from '../types/collaboration.types'
+import type { AiChatWsEvent } from '../types/ai-chat-ws.types'
 
 interface ProviderCallbacks {
   onStatus: (status: ConnectionStatus) => void
@@ -13,6 +15,8 @@ interface ProviderCallbacks {
   onRateLimitWarning: (message: string) => void
   /** An edit failed to persist after the bounded retries — surface a toast. */
   onAckRetriesExhausted: () => void
+  /** A `chat_result`/`proposal_result`/`ai_error` frame arrived (CLAUDE.md §9). */
+  onAiChatEvent: (event: AiChatWsEvent) => void
 }
 
 export interface MeridianProviderOptions extends ProviderCallbacks {
@@ -151,6 +155,16 @@ export class MeridianProvider {
           String(asRecord(frame.data).message ?? 'You are approaching the rate limit.'),
         )
         break
+      // Flat on the wire (requestId + payload alongside `event`, no `data` key) —
+      // parseAiChatEvent reads `frame` itself, not `frame.data` (CLAUDE.md §4/§9).
+      case 'chat_result':
+      case 'proposal_result':
+      case 'ai_error': {
+        const parsed = parseAiChatEvent(frame as Json)
+        if (parsed) this.opts.onAiChatEvent(parsed)
+        else console.warn('[meridian] malformed AI chat frame', frame)
+        break
+      }
       default:
         console.warn('[meridian] unrecognized frame', frame.event)
     }
