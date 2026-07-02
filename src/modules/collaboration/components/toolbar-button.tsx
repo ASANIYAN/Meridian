@@ -41,7 +41,8 @@ export function ToolbarDivider() {
   return <span aria-hidden className="mx-1.5 h-4 w-px bg-border" />
 }
 
-/** Small downward caret for menu triggers (the one place a glyph won't do). */
+/** Small downward caret for menu triggers — kept as a hand-drawn glyph since
+ *  it predates the lucide-react adoption and a swap here buys nothing. */
 export function Caret() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="size-3">

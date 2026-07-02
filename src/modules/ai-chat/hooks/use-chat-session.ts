@@ -1,23 +1,32 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
+import { useCollaboration } from '@/modules/collaboration/hooks/use-collaboration'
 import { acceptChatProposal, declineChatProposal, proposeChatEdit } from '../api/ai-chat-api'
 import {
   toErrorOutcome,
+  toOutcomeFromWsEvent,
   toProposalAcceptErrorOutcome,
-  toProposalOutcome,
   toSuccessOutcome,
 } from '../utils/chat-outcome'
 import type { ChatOutcome, ChatTurn } from '../types/ai-chat.types'
+
+/** Backstop only — the backend guarantees a WS response within ~120s (CLAUDE.md
+ *  §9); this just covers the WS message itself being dropped in transit. */
+const AI_CHAT_TIMEOUT_MS = 130_000
 
 /**
  * The AI chat thread for one document (FE-CHAT-2/3). Author-only by virtue of
  * where it's mounted — the sidebar gates on `role` from useCollaboration and
  * only renders this for an author (CLAUDE.md §6), so the hook itself stays
- * role-agnostic. Each `send` appends a pending turn and resolves it into a
- * staged proposal or a non-fatal outcome once the request settles.
+ * role-agnostic. Each `send` appends a pending turn; `/chat` and `/chat/propose`
+ * now return a `requestId` immediately (202) and the real outcome arrives later
+ * as a WS frame on the document's existing connection (CLAUDE.md §9) — this hook
+ * registers a waiter for that requestId rather than resolving from the mutation.
  */
 export function useChatSession(documentId: string) {
+  const { registerAiChatWaiter } = useCollaboration()
   const [turns, setTurns] = useState<ChatTurn[]>([])
+  const timeouts = useRef(new Map<string, ReturnType<typeof setTimeout>>())
 
   const hasActionableProposal = useCallback(
     (turnId: string, proposalId: string) =>
@@ -40,10 +49,35 @@ export function useChatSession(documentId: string) {
     setTurns((prev) => prev.map((t) => (t.id === turnId ? { ...t, action } : t)))
   }, [])
 
+  // Register a one-shot waiter for the requestId a 202 response handed back,
+  // with a client-side backstop in case the WS message itself never arrives.
+  const awaitAiChatResult = useCallback(
+    (turnId: string, requestId: string) => {
+      setTurns((prev) => prev.map((t) => (t.id === turnId ? { ...t, requestId } : t)))
+
+      const unregister = registerAiChatWaiter(requestId, (event) => {
+        clearTimeout(timeouts.current.get(requestId))
+        timeouts.current.delete(requestId)
+        resolveTurn(turnId, toOutcomeFromWsEvent(event))
+      })
+
+      const timer = setTimeout(() => {
+        timeouts.current.delete(requestId)
+        unregister()
+        resolveTurn(turnId, {
+          kind: 'error',
+          message: 'The assistant is taking too long to respond. Please try again.',
+        })
+      }, AI_CHAT_TIMEOUT_MS)
+      timeouts.current.set(requestId, timer)
+    },
+    [registerAiChatWaiter, resolveTurn],
+  )
+
   const proposeMutation = useMutation({
     mutationFn: ({ prompt }: { turnId: string; prompt: string }) =>
       proposeChatEdit(documentId, prompt),
-    onSuccess: (data, { turnId }) => resolveTurn(turnId, toProposalOutcome(data)),
+    onSuccess: ({ requestId }, { turnId }) => awaitAiChatResult(turnId, requestId),
     onError: (error, { turnId }) => resolveTurn(turnId, toErrorOutcome(error)),
   })
 

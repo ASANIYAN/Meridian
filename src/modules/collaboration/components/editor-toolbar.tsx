@@ -1,14 +1,33 @@
 import { type Editor, useEditorState } from '@tiptap/react'
+import {
+  Code,
+  IndentDecrease,
+  IndentIncrease,
+  List,
+  ListOrdered,
+  ListTodo,
+  Minus,
+  Quote,
+  Redo2,
+  Search,
+  Subscript,
+  Superscript,
+  Undo2,
+} from 'lucide-react'
 import { ToolbarButton, ToolbarDivider } from './toolbar-button'
 import { ToolbarHeadingMenu } from './toolbar-heading-menu'
 import { ToolbarAlignMenu } from './toolbar-align-menu'
 import { ToolbarLinkPopover } from './toolbar-link-popover'
+import { ToolbarTableMenu } from './toolbar-table-menu'
+import { ToolbarFindReplacePopover } from './toolbar-find-replace-popover'
 
 /**
  * The editor's formatting toolbar (CLAUDE.md §2/§5 — fully custom, no shadcn
- * primitive for it). Controls share one brand vocabulary: letterforms for marks
- * (B/I/U/S), matched-weight glyphs for blocks, and mono text triggers for the
- * block-type and alignment menus — deliberately not a third-party icon set.
+ * primitive for it). Controls mix two vocabularies by deliberate choice: legible
+ * letterforms for marks that read fine as text (B/I/U/S, highlight A), and
+ * `lucide-react` icons for anything that isn't self-explanatory as a glyph
+ * (lists, undo/redo, link, tables, indent) — the ambiguous bullet/numbered-list
+ * glyphs were the original reason for adopting an icon set here.
  *
  * `useEditorState` subscribes to just the flags rendered here, so the toolbar
  * re-renders on selection changes without re-rendering on every keystroke.
@@ -24,11 +43,17 @@ export function EditorToolbar({ editor }: { editor: Editor }) {
       highlight: e.isActive('highlight'),
       code: e.isActive('code'),
       link: e.isActive('link'),
+      subscript: e.isActive('subscript'),
+      superscript: e.isActive('superscript'),
       bulletList: e.isActive('bulletList'),
       orderedList: e.isActive('orderedList'),
+      taskList: e.isActive('taskList'),
       blockquote: e.isActive('blockquote'),
+      table: e.isActive('table'),
       canUndo: e.can().undo(),
       canRedo: e.can().redo(),
+      canSink: e.can().sinkListItem('listItem'),
+      canLift: e.can().liftListItem('listItem'),
     }),
   })
 
@@ -80,7 +105,21 @@ export function EditorToolbar({ editor }: { editor: Editor }) {
         active={state.code}
         onClick={() => editor.chain().focus().toggleCode().run()}
       >
-        <span className="font-mono text-[12px] leading-none">{'</>'}</span>
+        <Code className="size-4" />
+      </ToolbarButton>
+      <ToolbarButton
+        label="Subscript"
+        active={state.subscript}
+        onClick={() => editor.chain().focus().toggleSubscript().run()}
+      >
+        <Subscript className="size-4" />
+      </ToolbarButton>
+      <ToolbarButton
+        label="Superscript"
+        active={state.superscript}
+        onClick={() => editor.chain().focus().toggleSuperscript().run()}
+      >
+        <Superscript className="size-4" />
       </ToolbarButton>
       <ToolbarLinkPopover editor={editor} active={state.link} />
 
@@ -91,26 +130,62 @@ export function EditorToolbar({ editor }: { editor: Editor }) {
         active={state.bulletList}
         onClick={() => editor.chain().focus().toggleBulletList().run()}
       >
-        <span className="text-[15px] leading-none">•</span>
+        <List className="size-4" />
       </ToolbarButton>
       <ToolbarButton
         label="Numbered list"
         active={state.orderedList}
         onClick={() => editor.chain().focus().toggleOrderedList().run()}
       >
-        <span className="font-mono text-[11px] leading-none">1.</span>
+        <ListOrdered className="size-4" />
+      </ToolbarButton>
+      <ToolbarButton
+        label="Task list"
+        active={state.taskList}
+        onClick={() => editor.chain().focus().toggleTaskList().run()}
+      >
+        <ListTodo className="size-4" />
       </ToolbarButton>
       <ToolbarButton
         label="Quote"
         active={state.blockquote}
         onClick={() => editor.chain().focus().toggleBlockquote().run()}
       >
-        <span className="font-display text-[16px] leading-none">&ldquo;</span>
+        <Quote className="size-4" />
+      </ToolbarButton>
+      <ToolbarButton
+        label="Horizontal rule"
+        onClick={() => editor.chain().focus().setHorizontalRule().run()}
+      >
+        <Minus className="size-4" />
+      </ToolbarButton>
+      <ToolbarButton
+        label="Indent"
+        disabled={!state.canSink}
+        onClick={() => editor.chain().focus().sinkListItem('listItem').run()}
+      >
+        <IndentIncrease className="size-4" />
+      </ToolbarButton>
+      <ToolbarButton
+        label="Outdent"
+        disabled={!state.canLift}
+        onClick={() => editor.chain().focus().liftListItem('listItem').run()}
+      >
+        <IndentDecrease className="size-4" />
       </ToolbarButton>
 
       <ToolbarDivider />
 
       <ToolbarAlignMenu editor={editor} />
+      <ToolbarTableMenu editor={editor} active={state.table} />
+
+      <ToolbarDivider />
+
+      <ToolbarFindReplacePopover editor={editor}>
+        <ToolbarButton label="Find and replace">
+          <Search className="size-4" />
+        </ToolbarButton>
+      </ToolbarFindReplacePopover>
 
       <ToolbarDivider />
 
@@ -119,14 +194,14 @@ export function EditorToolbar({ editor }: { editor: Editor }) {
         disabled={!state.canUndo}
         onClick={() => editor.chain().focus().undo().run()}
       >
-        <span className="text-[14px] leading-none">↶</span>
+        <Undo2 className="size-4" />
       </ToolbarButton>
       <ToolbarButton
         label="Redo"
         disabled={!state.canRedo}
         onClick={() => editor.chain().focus().redo().run()}
       >
-        <span className="text-[14px] leading-none">↷</span>
+        <Redo2 className="size-4" />
       </ToolbarButton>
     </div>
   )

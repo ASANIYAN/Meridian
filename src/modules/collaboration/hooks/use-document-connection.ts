@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import * as Y from 'yjs'
 import { Awareness } from 'y-protocols/awareness'
@@ -9,6 +9,7 @@ import type { Role } from '@/types/document'
 import { MeridianProvider } from '../provider/meridian-provider'
 import type { CollaborationContextValue } from '../context/collaboration-context'
 import type { ConnectionStatus, PresentUser } from '../types/collaboration.types'
+import type { AiChatWsEvent } from '../types/ai-chat-ws.types'
 
 /**
  * Heavy hook (FE-COLLAB-6) — the single instantiation point for the Y.Doc,
@@ -31,6 +32,19 @@ export function useDocumentConnection(documentId: string, role?: Role): Collabor
   const [status, setStatus] = useState<ConnectionStatus>('connecting')
   const [presentUsers, setPresentUsers] = useState<PresentUser[]>([])
   const [ready, setReady] = useState(false)
+
+  // One-shot waiters keyed by requestId (AI chat's async 202+WS results,
+  // CLAUDE.md §9) — a ref, not state: firing one shouldn't re-render every
+  // Context consumer, only the specific chat turn that registered it.
+  const aiChatWaiters = useRef(new Map<string, (event: AiChatWsEvent) => void>())
+
+  const registerAiChatWaiter = useCallback(
+    (requestId: string, handler: (event: AiChatWsEvent) => void) => {
+      aiChatWaiters.current.set(requestId, handler)
+      return () => aiChatWaiters.current.delete(requestId)
+    },
+    [],
+  )
 
   useEffect(() => {
     if (!token) return
@@ -57,6 +71,12 @@ export function useDocumentConnection(documentId: string, role?: Role): Collabor
         if (action.kind === 'redirect-login') navigate('/login?session=expired', { replace: true })
         else if (action.kind === 'redirect-documents') navigate('/documents', { replace: true })
       },
+      onAiChatEvent: (event) => {
+        const waiter = aiChatWaiters.current.get(event.data.requestId)
+        if (!waiter) return // abandoned/already-timed-out request — drop silently
+        aiChatWaiters.current.delete(event.data.requestId)
+        waiter(event)
+      },
     })
 
     return () => provider.destroy()
@@ -71,7 +91,7 @@ export function useDocumentConnection(documentId: string, role?: Role): Collabor
   }, [doc, awareness])
 
   return useMemo(
-    () => ({ doc, awareness, status, presentUsers, role, ready }),
-    [doc, awareness, status, presentUsers, role, ready],
+    () => ({ doc, awareness, status, presentUsers, role, ready, registerAiChatWaiter }),
+    [doc, awareness, status, presentUsers, role, ready, registerAiChatWaiter],
   )
 }
