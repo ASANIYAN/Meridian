@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { Editor } from '@tiptap/react'
+import { Link as LinkIcon } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -34,7 +35,7 @@ export function ToolbarLinkPopover({ editor, active }: { editor: Editor; active:
     <Popover open={open} onOpenChange={onOpenChange}>
       <PopoverTrigger asChild>
         <ToolbarButton label="Link" active={active}>
-          <LinkGlyph />
+          <LinkIcon className="size-4" />
         </ToolbarButton>
       </PopoverTrigger>
       <PopoverContent align="start" className="w-72">
@@ -65,26 +66,5 @@ export function ToolbarLinkPopover({ editor, active }: { editor: Editor; active:
         </form>
       </PopoverContent>
     </Popover>
-  )
-}
-
-/** The one toolbar control with no natural letterform — a small utilitarian
- *  glyph, like the menu caret, rather than adopting a full icon set. */
-function LinkGlyph() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      className="size-4"
-      aria-hidden="true"
-    >
-      <path
-        d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
   )
 }
