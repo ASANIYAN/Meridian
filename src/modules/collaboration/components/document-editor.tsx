@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { type Editor, EditorContent, useEditor } from '@tiptap/react'
+import { type Editor, EditorContent, useEditor, useEditorState } from '@tiptap/react'
 import type * as Y from 'yjs'
 import {
   DropdownMenu,
@@ -155,9 +155,16 @@ function EditorCommandBar({ editor, title }: { editor: Editor | null; title: str
           >
             Divider
           </DropdownMenuItem>
+          <DropdownMenuItem
+            disabled={!editor}
+            onSelect={() =>
+              editor?.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()
+            }
+          >
+            Table
+          </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem disabled>Image</DropdownMenuItem>
-          <DropdownMenuItem disabled>Table</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
@@ -193,7 +200,34 @@ function EditorCommandBar({ editor, title }: { editor: Editor | null; title: str
       >
         Tools
       </button>
+
+      <div className="ml-auto pl-3">
+        <WordCount editor={editor} />
+      </div>
     </div>
+  )
+}
+
+/** Purely derived from `editor.storage.characterCount` (CLAUDE.md §2/§8 —
+ *  local/informational only, no command, no persisted state). */
+function WordCount({ editor }: { editor: Editor | null }) {
+  const count = useEditorState({
+    editor,
+    selector: ({ editor: e }) =>
+      e
+        ? {
+            words: e.storage.characterCount.words(),
+            characters: e.storage.characterCount.characters(),
+          }
+        : null,
+  })
+
+  if (!count) return null
+
+  return (
+    <span className="whitespace-nowrap font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
+      {count.words} words · {count.characters} characters
+    </span>
   )
 }
 
