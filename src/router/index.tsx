@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { createBrowserRouter, Navigate } from 'react-router-dom'
+import { createBrowserRouter } from 'react-router-dom'
 import { LoginView } from '@/modules/auth/views/login'
 import { SignupView } from '@/modules/auth/views/signup'
 import { VerifyEmailView } from '@/modules/auth/views/verify-email'
@@ -9,7 +9,7 @@ import { ResetPasswordView } from '@/modules/auth/views/reset-password'
 import { ResendVerificationView } from '@/modules/auth/views/resend-verification'
 import { ClaimView } from '@/modules/join/views/claim'
 import { DocumentsView } from '@/modules/documents/views/documents'
-import { RequireAuth } from './require-auth'
+import { HomeRoute, RequireAuth } from './require-auth'
 import { RouteFallback } from '@/components/custom-components/route-fallback'
 import { NotFoundView } from '@/components/custom-components/not-found'
 import { AppShellPreview } from '@/dev/app-shell-preview'
@@ -29,7 +29,7 @@ const DocumentRoute = lazy(() =>
  * The document editor (/documents/:id) lands with the collaboration epic.
  */
 export const router = createBrowserRouter([
-  { path: '/', element: <Navigate to="/documents" replace /> },
+  { path: '/', element: <HomeRoute /> },
 
   // Public
   { path: '/login', element: <LoginView /> },
