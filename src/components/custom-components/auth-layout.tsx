@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { Link } from 'react-router-dom'
 import { Graticule } from './graticule'
 import { Wordmark } from './brand-mark'
 
@@ -28,9 +29,13 @@ export function AuthLayout({ children, lede }: AuthLayoutProps) {
         />
         <Graticule state="idle" focal={{ x: 0.5, y: 0.36 }} sweep={Math.PI * 2} arcStart={0} />
 
-        <div className="relative">
+        <Link
+          to="/"
+          aria-label="Meridian home"
+          className="relative transition-opacity duration-150 ease-out hover:opacity-80"
+        >
           <Wordmark />
-        </div>
+        </Link>
 
         <h1 className="relative max-w-[19ch] font-display text-[clamp(2.125rem,4.4vw,3.75rem)] font-normal leading-[1.04] tracking-[-0.015em] text-foreground [font-optical-sizing:auto]">
           {lede ?? (
