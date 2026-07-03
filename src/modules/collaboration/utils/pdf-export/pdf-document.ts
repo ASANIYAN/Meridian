@@ -72,7 +72,6 @@ const styles = StyleSheet.create({
   // counts the gap between any two blocks. See collapseMargins() below,
   // which computes each block's actual top/bottom margin from this same
   // data (OWN_MARGINS) the way a browser would.
-  title: { fontSize: 20, fontFamily: 'Fraunces', lineHeight: 1.2 },
   heading1: { fontSize: 20, fontFamily: 'Fraunces', lineHeight: 1.2 },
   heading2: { fontSize: 16, fontFamily: 'Fraunces', lineHeight: 1.2 },
   heading3: { fontSize: 13, fontFamily: 'Fraunces', lineHeight: 1.2 },
@@ -116,7 +115,6 @@ const styles = StyleSheet.create({
 // block's own top margin against its predecessor's own bottom margin and
 // keep only the larger one, the same rule CSS uses for adjacent margins.
 const OWN_MARGINS: Record<string, { top: number; bottom: number }> = {
-  title: { top: 0, bottom: 18 },
   heading1: { top: 14, bottom: 8 },
   heading2: { top: 12, bottom: 6 },
   heading3: { top: 10, bottom: 5 },
@@ -152,13 +150,12 @@ type Margin = { marginTop: number; marginBottom: number }
 
 /**
  * Computes a collapsed marginTop/marginBottom per block, index-aligned with
- * `[title, ...blocks]` (index 0 is the title's margin). Mirrors CSS's
- * adjacent-margin collapse: the gap between any two elements is the larger
- * of "this element's own top margin" and "the previous element's own bottom
- * margin", not the sum of both.
+ * `blocks`. Mirrors CSS's adjacent-margin collapse: the gap between any two
+ * elements is the larger of "this element's own top margin" and "the
+ * previous element's own bottom margin", not the sum of both.
  */
 function collapseMargins(blocks: PdfBlock[]): Margin[] {
-  const ownMargins = [OWN_MARGINS.title, ...blocks.map(ownMarginsFor)]
+  const ownMargins = blocks.map(ownMarginsFor)
   return ownMargins.map((own, index) => ({
     marginTop: index === 0 ? 0 : Math.max(own.top, ownMargins[index - 1].bottom),
     marginBottom: index === ownMargins.length - 1 ? own.bottom : 0,
@@ -286,8 +283,7 @@ export function MeridianPdfDocument({ title, blocks }: { title: string; blocks: 
     h(
       Page,
       { size: 'A4', style: styles.page, wrap: true },
-      h(Text, { style: withMargin(styles.title, margins[0]) }, title),
-      blocks.map((block, index) => renderBlock(block, index, margins[index + 1])),
+      blocks.map((block, index) => renderBlock(block, index, margins[index])),
     ),
   )
 }
