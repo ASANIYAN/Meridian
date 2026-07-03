@@ -13,7 +13,7 @@ type TiptapNode = {
   marks?: { type?: string; attrs?: Record<string, unknown> }[]
 }
 
-export type PdfAlign = 'left' | 'center' | 'right'
+export type PdfAlign = 'left' | 'center' | 'right' | 'justify'
 
 export interface PdfInlineRun {
   text: string
@@ -225,10 +225,10 @@ function sameRunStyle(a: PdfInlineRun, b: PdfInlineRun) {
 
 function readAlign(node: TiptapNode): PdfAlign | undefined {
   const align = node.attrs?.textAlign
-  // 'justify' is deliberately excluded: @react-pdf/renderer's justification
-  // math visibly breaks with the core (non-embedded) Helvetica fonts used
-  // here, spreading individual characters apart on short lines (e.g. a
-  // "Phone:" label) instead of just the word gaps. Falling back to left
-  // alignment is far less jarring than that.
-  return align === 'center' || align === 'right' ? align : undefined
+  // 'justify' previously broke visibly with the core (non-embedded) Helvetica
+  // fonts used here — its AFM metrics spread individual characters apart on
+  // short lines instead of just the word gaps. pdf-document.ts now embeds
+  // real Geist/Fraunces glyph metrics for body/heading text, so justify is
+  // safe to pass through.
+  return align === 'center' || align === 'right' || align === 'justify' ? align : undefined
 }
