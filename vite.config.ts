@@ -15,6 +15,18 @@ export default defineConfig({
   // No dev proxy: apiClient calls VITE_API_URL directly (src/lib/api/client.ts)
   // so the app behaves the same in dev and in production (Vercel). Requires
   // the backend to allow the dev origin via CORS.
+  // 'es' (not the default 'iife') so the PDF-export worker (pdf.worker.ts) can
+  // use plain ESM imports from node_modules (@react-pdf/renderer, react).
+  worker: {
+    format: 'es',
+  },
+  // Dev-only: force @react-pdf/renderer into the dependency pre-bundle up
+  // front. Otherwise Vite only discovers it the first time the PDF worker
+  // actually imports it, mid-generation, and that on-demand
+  // optimize+reload can race with (and kill) the worker's first run.
+  optimizeDeps: {
+    include: ['@react-pdf/renderer'],
+  },
   build: {
     rollupOptions: {
       output: {

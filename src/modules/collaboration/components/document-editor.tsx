@@ -12,6 +12,7 @@ import {
 import { EditorToolbar } from './editor-toolbar'
 import { exportDocument } from '../utils/export-document'
 import { createEditorExtensions } from '../editor-extensions'
+import { useDownloadPdf } from '../hooks/use-download-pdf'
 
 interface DocumentEditorProps {
   /** The already-hydrated shared doc from the route's connection (CLAUDE.md §4). */
@@ -96,9 +97,11 @@ export function DocumentEditor({
 }
 
 function EditorCommandBar({ editor, title }: { editor: Editor | null; title: string }) {
-  const exportAs = (format: 'pdf' | 'docx' | 'txt' | 'md') => {
+  const { downloadPdf, isGenerating: isGeneratingPdf } = useDownloadPdf()
+
+  const exportAs = (format: 'docx' | 'txt' | 'md') => {
     if (!editor) return
-    exportDocument(editor.getJSON(), title, format, { editorElement: editor.view.dom })
+    exportDocument(editor.getJSON(), title, format)
   }
 
   return (
@@ -109,8 +112,11 @@ function EditorCommandBar({ editor, title }: { editor: Editor | null; title: str
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="min-w-56">
           <DropdownMenuLabel>Download</DropdownMenuLabel>
-          <DropdownMenuItem disabled={!editor} onSelect={() => exportAs('pdf')}>
-            PDF document
+          <DropdownMenuItem
+            disabled={!editor || isGeneratingPdf}
+            onSelect={() => editor && downloadPdf(editor.getJSON(), title)}
+          >
+            {isGeneratingPdf ? 'Generating PDF…' : 'PDF document'}
           </DropdownMenuItem>
           <DropdownMenuItem disabled={!editor} onSelect={() => exportAs('docx')}>
             Word document
