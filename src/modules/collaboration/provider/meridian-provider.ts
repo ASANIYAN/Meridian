@@ -21,7 +21,14 @@ interface ProviderCallbacks {
 
 export interface MeridianProviderOptions extends ProviderCallbacks {
   url: string
-  token: string
+  /**
+   * Read fresh on every (re)connect rather than a string captured once — the
+   * session token can rotate mid-connection (proactive refresh,
+   * useTokenRefresh), and a live socket must not be torn down just to hand it
+   * a new token; the next reconnect (or the next fresh join) should simply
+   * pick up whatever this returns at that moment.
+   */
+  getToken: () => string
   documentId: string
   doc: Y.Doc
   role?: Role
@@ -81,7 +88,7 @@ export class MeridianProvider {
     this.opts.onStatus(this.reconnectAttempts > 0 ? 'reconnecting' : 'connecting')
 
     const base = this.opts.url.replace(/\/$/, '')
-    const ws = new WebSocket(`${base}/?token=${encodeURIComponent(this.opts.token)}`)
+    const ws = new WebSocket(`${base}/?token=${encodeURIComponent(this.opts.getToken())}`)
     ws.binaryType = 'arraybuffer'
     ws.onopen = this.handleOpen
     ws.onmessage = this.handleMessage
