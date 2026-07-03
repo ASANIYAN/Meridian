@@ -16,16 +16,12 @@ const ROLES = [
   },
 ] as const
 
-/**
- * Three parallel options, not a sequence — deliberately not numbered
- * (CLAUDE.md's role model has no inherent order between Editor and Viewer).
- */
 export function RolesSection() {
   const { ref, revealed } = useInViewReveal<HTMLDivElement>()
 
   return (
     <section className="bg-muted/40 py-24">
-      <div className="mx-auto max-w-[72rem] px-6">
+      <div className="mx-auto max-w-6xl px-6">
         <div className="mx-auto max-w-[40ch] text-center">
           <p className="font-mono text-[11px] font-medium uppercase tracking-[0.28em] text-muted-foreground">
             Who's in the document

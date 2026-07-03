@@ -19,7 +19,7 @@ export function TrustSection() {
       <div
         ref={ref}
         data-revealed={revealed}
-        className="reveal-group mx-auto grid max-w-[72rem] gap-6 px-6 md:grid-cols-2"
+        className="reveal-group mx-auto grid max-w-6xl gap-6 px-6 md:grid-cols-2"
       >
         <div className="rounded-lg border border-border bg-card p-8">
           <div className="flex items-center gap-2">
