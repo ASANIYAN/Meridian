@@ -6,11 +6,7 @@ type TiptapNode = {
   marks?: { type?: string; attrs?: Record<string, unknown> }[]
 }
 
-type ExportFormat = 'pdf' | 'docx' | 'txt' | 'md'
-
-interface ExportDocumentOptions {
-  editorElement?: HTMLElement | null
-}
+type ExportFormat = 'docx' | 'txt' | 'md'
 
 interface TextBlock {
   type: 'paragraph' | 'heading' | 'bullet' | 'numbered' | 'quote' | 'code'
@@ -31,12 +27,7 @@ interface TextRun {
   color?: string
 }
 
-export function exportDocument(
-  json: TiptapNode,
-  title: string,
-  format: ExportFormat,
-  options: ExportDocumentOptions = {},
-) {
+export function exportDocument(json: TiptapNode, title: string, format: ExportFormat) {
   const safeTitle = slugify(title || 'Meridian document')
   const blocks = getTextBlocks(json)
 
@@ -50,134 +41,11 @@ export function exportDocument(
     return
   }
 
-  if (format === 'pdf') {
-    printEditorPdf(options.editorElement, title || 'Meridian document')
-    return
-  }
-
   downloadBlob(
     `${safeTitle}.docx`,
     createDocx(blocks),
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   )
-}
-
-function printEditorPdf(editorElement: HTMLElement | null | undefined, title: string) {
-  if (!editorElement) return
-
-  const styles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
-    .map((node) => node.outerHTML)
-    .join('\n')
-  const editorClone = editorElement.cloneNode(true) as HTMLElement
-  editorClone.removeAttribute('contenteditable')
-  editorClone.querySelectorAll('[data-placeholder]').forEach((node) => {
-    node.removeAttribute('data-placeholder')
-  })
-
-  const printFrame = document.createElement('iframe')
-  printFrame.title = title
-  printFrame.style.position = 'fixed'
-  printFrame.style.right = '0'
-  printFrame.style.bottom = '0'
-  printFrame.style.width = '0'
-  printFrame.style.height = '0'
-  printFrame.style.border = '0'
-  printFrame.style.visibility = 'hidden'
-  document.body.append(printFrame)
-
-  const printDocument = printFrame.contentDocument
-  const printWindow = printFrame.contentWindow
-  if (!printDocument || !printWindow) {
-    printFrame.remove()
-    return
-  }
-
-  printDocument.open()
-  printDocument.write(`<!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>${escapeHtml(title)}</title>
-    ${styles}
-    <style>
-      :root {
-        color-scheme: light;
-        --background: #ffffff;
-        --foreground: #0f1a2a;
-        --card: #ffffff;
-        --muted: #eceff3;
-        --muted-foreground: #4f6072;
-        --border: #d7dee6;
-        --accent: #cda349;
-        --seam: color-mix(in srgb, var(--accent) 55%, transparent);
-      }
-      @page {
-        size: letter;
-        margin: 0;
-      }
-      html,
-      body {
-        width: 100%;
-        min-height: 100%;
-        margin: 0;
-        background: #ffffff;
-      }
-      body {
-        color: var(--foreground);
-        font-family: var(--font-sans);
-        padding: 1in;
-        box-sizing: border-box;
-      }
-      .print-page {
-        width: 100%;
-        background: #ffffff;
-      }
-      .meridian-editor {
-        width: 100%;
-        max-width: none;
-        min-height: 0;
-        margin: 0;
-        color: var(--foreground);
-        print-color-adjust: exact;
-        -webkit-print-color-adjust: exact;
-      }
-      .meridian-editor.ProseMirror {
-        white-space: pre-wrap;
-        word-break: break-word;
-      }
-      .meridian-editor p.is-editor-empty:first-child::before {
-        content: none;
-      }
-      @media print {
-        html,
-        body,
-        .print-page {
-          background: #ffffff;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <main class="print-page">${editorClone.outerHTML}</main>
-  </body>
-</html>`)
-  printDocument.close()
-
-  const runPrint = () => {
-    const previousTitle = document.title
-    document.title = title
-    printWindow.focus()
-    printWindow.print()
-    document.title = previousTitle
-    window.setTimeout(() => printFrame.remove(), 1000)
-  }
-
-  if (printDocument.fonts) {
-    void printDocument.fonts.ready.then(runPrint)
-  } else {
-    printWindow.setTimeout(runPrint, 150)
-  }
 }
 
 function getTextBlocks(root: TiptapNode): TextBlock[] {
@@ -487,7 +355,7 @@ function concat(parts: Uint8Array[]) {
   return merged
 }
 
-function downloadBlob(filename: string, blob: Blob, type = blob.type) {
+export function downloadBlob(filename: string, blob: Blob, type = blob.type) {
   const url = URL.createObjectURL(type === blob.type ? blob : new Blob([blob], { type }))
   const link = document.createElement('a')
   link.href = url
@@ -506,10 +374,6 @@ function escapeXml(value: string) {
     .replaceAll('"', '&quot;')
 }
 
-function escapeHtml(value: string) {
-  return escapeXml(value).replaceAll("'", '&#39;')
-}
-
 function normalizeHexColor(value?: string) {
   if (!value) return undefined
   const color = value.trim()
@@ -521,7 +385,7 @@ function normalizeHexColor(value?: string) {
   return undefined
 }
 
-function slugify(value: string) {
+export function slugify(value: string) {
   return (
     value
       .trim()
