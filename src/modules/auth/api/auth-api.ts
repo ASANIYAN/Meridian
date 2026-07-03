@@ -1,5 +1,5 @@
 import { apiClient, unwrap, type ApiEnvelope } from '@/lib/api/client'
-import type { LoginResponse, VerifyEmailResponse } from '../types/auth.types'
+import type { LoginResponse, RefreshTokenResponse, VerifyEmailResponse } from '../types/auth.types'
 import type { LoginValues, SignupValues } from '../utils/schemas'
 
 /**
@@ -43,4 +43,15 @@ export async function resetPassword(payload: {
   newPassword: string
 }): Promise<void> {
   await apiClient.post('/auth/reset-password', payload)
+}
+
+/**
+ * POST /auth/refresh — rotates the current access token. No body; the
+ * existing JWT rides along via the apiClient request interceptor's
+ * Authorization header. A missing/expired/revoked token 401s, which the
+ * shared response interceptor already turns into a logout + redirect.
+ */
+export async function refreshToken(): Promise<RefreshTokenResponse> {
+  const res = await apiClient.post<ApiEnvelope<RefreshTokenResponse>>('/auth/refresh')
+  return unwrap(res)
 }

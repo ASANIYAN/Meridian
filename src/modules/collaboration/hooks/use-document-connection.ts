@@ -46,12 +46,26 @@ export function useDocumentConnection(documentId: string, role?: Role): Collabor
     [],
   )
 
+  // Kept live so the provider can always read the freshest token (a rotation
+  // shouldn't tear down and rejoin an otherwise-healthy connection — see
+  // MeridianProviderOptions.getToken).
+  const tokenRef = useRef(token)
   useEffect(() => {
-    if (!token) return
+    tokenRef.current = token
+  }, [token])
+
+  // Gate on *whether* a token exists, not its value — a rotation must not
+  // retrigger this effect (that would tear down and rejoin a healthy
+  // connection just to hand it a new string it can already read live via
+  // tokenRef/getToken above). Only a token appearing/disappearing entirely
+  // (login/logout) should recreate the provider.
+  const hasToken = token != null
+  useEffect(() => {
+    if (!tokenRef.current) return
 
     const provider = new MeridianProvider({
       url: env.wsUrl,
-      token,
+      getToken: () => tokenRef.current ?? '',
       documentId,
       doc,
       role,
@@ -80,7 +94,7 @@ export function useDocumentConnection(documentId: string, role?: Role): Collabor
     })
 
     return () => provider.destroy()
-  }, [documentId, token, doc, role, navigate, addToast])
+  }, [documentId, hasToken, doc, role, navigate, addToast])
 
   // Discard the doc when leaving — no stale state leaks into the next document.
   useEffect(() => {

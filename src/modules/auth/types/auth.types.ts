@@ -14,3 +14,12 @@ export interface VerifyEmailResponse {
   user?: User
   alreadyVerified?: boolean
 }
+
+/**
+ * POST /auth/refresh — rotates the current access token for a new one. Reads
+ * the existing (not-yet-expired) JWT off the Authorization header rather than
+ * a separate refresh token; a missing/expired/revoked JWT 401s.
+ */
+export interface RefreshTokenResponse {
+  token: string
+}

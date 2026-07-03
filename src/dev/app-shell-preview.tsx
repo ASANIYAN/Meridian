@@ -71,7 +71,7 @@ export function AppShellPreview() {
               <span className="size-1.5 rounded-full bg-mist" />
             </div>
             <h2 className="font-display text-[1.25rem] leading-snug text-foreground">{d.title}</h2>
-            <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
+            <p className="mt-1 font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
               Updated {d.updated}
             </p>
           </article>

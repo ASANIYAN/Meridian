@@ -4,11 +4,6 @@ import { Graticule, type GraticuleState } from '@/components/custom-components/g
 import { Button } from '@/components/ui/button'
 import { ConvergenceDemo } from './convergence-demo'
 
-/**
- * The chart's opening beat: draws in once, then settles into the same
- * pulsing "converging" node used at the auth entrance — same brand thesis,
- * not a coincidence (CLAUDE.md's headline: "Where every edit converges.").
- */
 export function HeroSection() {
   const [graticuleState, setGraticuleState] = useState<GraticuleState>('idle')
 
@@ -26,9 +21,7 @@ export function HeroSection() {
             'radial-gradient(120% 90% at 50% 20%, rgba(205,163,73,0.06), transparent 55%), radial-gradient(100% 100% at 30% 20%, #122033, var(--ink) 70%)',
         }}
       />
-      {/* Focal point sits in the clear band above the eyebrow, not on top
-          of it — the node is a small opaque circle, unlike the masked
-          linework, so it needs room the text doesn't occupy. */}
+
       <Graticule
         state={graticuleState}
         focal={{ x: 0.5, y: 0.12 }}
