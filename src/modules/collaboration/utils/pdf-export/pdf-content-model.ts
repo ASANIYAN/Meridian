@@ -13,7 +13,7 @@ type TiptapNode = {
   marks?: { type?: string; attrs?: Record<string, unknown> }[]
 }
 
-export type PdfAlign = 'left' | 'center' | 'right' | 'justify'
+export type PdfAlign = 'left' | 'center' | 'right'
 
 export interface PdfInlineRun {
   text: string
@@ -177,6 +177,12 @@ function getText(node: TiptapNode): string {
 }
 
 function getRuns(node: TiptapNode): PdfInlineRun[] {
+  // A hardBreak (Shift+Enter) is a void inline node — no text, no content —
+  // so without this case it silently disappears during the flatMap below,
+  // gluing the text before and after it together with no separator at all.
+  // react-pdf treats a literal "\n" inside a Text's content as a forced line
+  // break (the same technique mergeCellRuns already relies on below).
+  if (node.type === 'hardBreak') return [{ text: '\n' }]
   if (node.text) return [{ text: node.text, ...marksToRun(node.marks) }]
   return compactRuns((node.content ?? []).flatMap(getRuns))
 }
@@ -219,5 +225,10 @@ function sameRunStyle(a: PdfInlineRun, b: PdfInlineRun) {
 
 function readAlign(node: TiptapNode): PdfAlign | undefined {
   const align = node.attrs?.textAlign
-  return align === 'center' || align === 'right' || align === 'justify' ? align : undefined
+  // 'justify' is deliberately excluded: @react-pdf/renderer's justification
+  // math visibly breaks with the core (non-embedded) Helvetica fonts used
+  // here, spreading individual characters apart on short lines (e.g. a
+  // "Phone:" label) instead of just the word gaps. Falling back to left
+  // alignment is far less jarring than that.
+  return align === 'center' || align === 'right' ? align : undefined
 }

@@ -203,4 +203,49 @@ describe('buildPdfBlocks', () => {
 
     expect(buildPdfBlocks(doc)[0]).toMatchObject({ kind: 'codeBlock', text: 'const x = 1' })
   })
+
+  it('turns a hardBreak into a forced line break instead of dropping it', () => {
+    const doc = {
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          content: [
+            { type: 'text', text: 'Line one.' },
+            { type: 'hardBreak' },
+            { type: 'text', text: 'Line two.', marks: [{ type: 'bold' }] },
+          ],
+        },
+      ],
+    }
+
+    const block = buildPdfBlocks(doc)[0]
+    expect(block.kind).toBe('paragraph')
+    if (block.kind === 'paragraph') {
+      expect(block.runs).toEqual([{ text: 'Line one.\n' }, { text: 'Line two.', bold: true }])
+    }
+  })
+
+  it('never lets a hardBreak silently glue two runs together', () => {
+    const doc = {
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          content: [
+            { type: 'text', text: 'accessible interfaces.' },
+            { type: 'hardBreak' },
+            { type: 'text', text: 'SKILLS', marks: [{ type: 'bold' }] },
+          ],
+        },
+      ],
+    }
+
+    const block = buildPdfBlocks(doc)[0]
+    if (block.kind === 'paragraph') {
+      const joined = block.runs.map((run) => run.text).join('')
+      expect(joined).not.toContain('interfaces.SKILLS')
+      expect(joined).toBe('accessible interfaces.\nSKILLS')
+    }
+  })
 })
