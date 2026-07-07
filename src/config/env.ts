@@ -40,10 +40,20 @@ function toWebSocketUrl(apiUrl: string): string {
 }
 
 /**
+ * `/health` lives on the API origin but, unlike every other REST route, is
+ * NOT under the `/v1` prefix (CLAUDE.md §2) — so it can't be reached through
+ * `apiClient`'s baseURL and needs its own derived URL.
+ */
+function toHealthUrl(apiUrl: string): string {
+  return new URL('/health', apiUrl).toString()
+}
+
+/**
  * Validated environment. Every env access in the app goes through this object,
  * never `import.meta.env` directly (FE-SETUP-5).
  */
 export const env = {
   ...parsed.data,
   wsUrl: toWebSocketUrl(parsed.data.VITE_API_URL),
+  healthUrl: toHealthUrl(parsed.data.VITE_API_URL),
 }
