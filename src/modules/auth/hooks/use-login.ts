@@ -8,6 +8,7 @@ import { useAuthStore } from '@/store/auth-store'
 import { useToastStore } from '@/store/toast-store'
 import { sanitizeRedirect } from '@/lib/redirect'
 import { getApiErrorMessage, getApiErrorStatus } from '@/lib/api/get-api-error-message'
+import { warmUpServer } from '@/lib/api/warm-up-server'
 import { decodeJwt } from '@/lib/jwt'
 import type { User } from '@/types/user'
 import { login } from '../api/auth-api'
@@ -65,6 +66,12 @@ export function useLogin() {
       form.setError('root', { message: 'Your session expired. Sign in to continue.' })
     }
   }, [form, searchParams])
+
+  // Re-arm in case the app-boot ping (main.tsx) succeeded long ago and the
+  // Render instance has since spun back down while this tab sat idle.
+  useEffect(() => {
+    void warmUpServer()
+  }, [])
 
   const mutation = useMutation({
     mutationFn: login,
